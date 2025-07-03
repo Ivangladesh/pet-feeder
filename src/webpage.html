@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <title>Alimentador Automático para Perros</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      html { font-family: sans-serif; text-align: center; }
+      body { margin: 0; padding: 0; background: #f7f7f7; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+      h1 { margin: 1em 0 0.5em 0; }
+      .container { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #0001; padding: 1.5em; max-width: 420px; width: 95vw; margin: 1em auto; }
+      .dias { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5em; margin-bottom: 1.5em; }
+      .dias label { cursor: pointer; display: inline-block; }
+      .dias input { display: none; }
+      .dias span {
+        background: #e0e0e0;
+        border-radius: 6px;
+        padding: 0.5em 1em;
+        transition: background 0.2s, color 0.2s;
+        display: inline-block;
+      }
+      .dias input:checked + span {
+        background: #5B5;
+        color: #fff;
+      }
+      .horarios { margin-bottom: 1.5em; }
+      .horario-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; margin-bottom: 0.5em; }
+      .horario-row input[type="time"] { font-size: 1em; padding: 0.2em 0.5em; border-radius: 4px; border: 1px solid #ccc; }
+      .horario-row button { background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 0.2em 0.7em; font-size: 1.1em; cursor: pointer; }
+      .add-btn { background: #5B5; color: #fff; border: none; border-radius: 4px; padding: 0.5em 1.2em; font-size: 1.1em; cursor: pointer; margin-bottom: 1em; }
+      .submit-btn { background: #3498db; color: #fff; border: none; border-radius: 4px; padding: 0.7em 2em; font-size: 1.2em; cursor: pointer; margin-top: 1em; }
+      @media (max-width: 600px) {
+        .container { padding: 1em; }
+        h1 { font-size: 1.3em; }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Alimentador Automático para Perros</h1>
+    <div id="fecha-hora" style="margin-bottom:1em;font-size:1.1em;color:#555;"></div>
+    <div class="container">
+      <form id="formAlimentador" autocomplete="off">
+        <h2>Días de la semana</h2>
+        <div class="dias">
+          <label><input type="radio" name="dias" value="L"><span>Lun</span></label>
+          <label><input type="radio" name="dias" value="M"><span>Mar</span></label>
+          <label><input type="radio" name="dias" value="X"><span>Mié</span></label>
+          <label><input type="radio" name="dias" value="J"><span>Jue</span></label>
+          <label><input type="radio" name="dias" value="V"><span>Vie</span></label>
+          <label><input type="radio" name="dias" value="S"><span>Sáb</span></label>
+          <label><input type="radio" name="dias" value="D"><span>Dom</span></label>
+        </div>
+        <h2>Horarios de alimentación</h2>
+        <div class="horarios" id="horarios"></div>
+        <button type="button" class="add-btn" onclick="agregarHorario()">Agregar horario</button>
+        <br>
+        <button type="submit" class="submit-btn">Guardar configuración</button>
+      </form>
+      <div id="mensaje" style="margin-top:1em;color:#27ae60;font-weight:bold;"></div>
+      <div id="spinner" style="display:none;margin-top:1em;"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" stroke="#3498db" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60"><animateTransform attributeName="transform" type="rotate" from="0 20 20" to="360 20 20" dur="1s" repeatCount="indefinite"/></circle></svg></div>
+      <button type="button" class="submit-btn" id="btnAlimentarAhora" style="background:#e74c3c;margin-top:1em;">Alimentar ahora</button>
+    </div>
+    <script>
+    function mostrarSpinner(mostrar) {
+        document.getElementById('spinner').style.display = mostrar ? '' : 'none';
+      }
+      // Alimentar ahora
+      document.getElementById('btnAlimentarAhora').onclick = function() {
+        mostrarSpinner(true);
+        fetch('/alimentar', { method: 'POST' })
+          .then(res => res.ok ? res.text() : Promise.reject('Error al alimentar'))
+          .then(msg => mostrarMensaje(msg || '¡Alimentación manual activada!'))
+          .catch(() => mostrarMensaje('Error al activar alimentación.'))
+          .finally(() => mostrarSpinner(false));
+      };
+      // Mostrar día y hora actual
+      function actualizarFechaHora() {
+        const fecha = new Date();
+        const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+        const dia = dias[fecha.getDay()];
+        const hora = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const fechaStr = `${dia} ${fecha.toLocaleDateString('es-ES')} - ${hora}`;
+        document.getElementById('fecha-hora').textContent = fechaStr;
+      }
+      setInterval(actualizarFechaHora, 1000);
+      actualizarFechaHora();
+      function agregarHorario() {
+        const horarios = document.getElementById('horarios');
+        const row = document.createElement('div');
+        row.className = 'horario-row';
+        row.innerHTML = `<input type="time" name="horario[]" required> <button type="button" onclick="eliminarHorario(this)">✕</button>`;
+        horarios.appendChild(row);
+      }
+      function eliminarHorario(btn) {
+        const row = btn.parentNode;
+        row.parentNode.removeChild(row);
+      }
+      // --- Manejo de horarios según el día seleccionado ---
+      let configuracionesGuardadas = [];
+
+      function cargarHorariosParaDia(dia) {
+        const horariosDiv = document.getElementById('horarios');
+        horariosDiv.innerHTML = '';
+        const horariosParaDia = configuracionesGuardadas.filter(conf => conf.dia === dia).map(conf => conf.horario);
+        if (horariosParaDia.length) {
+          horariosParaDia.forEach(horario => {
+            const row = document.createElement('div');
+            row.className = 'horario-row';
+            row.innerHTML = `<input type="time" name="horario[]" required value="${horario}"> <button type="button" onclick="eliminarHorario(this)">✕</button>`;
+            horariosDiv.appendChild(row);
+          });
+        } else {
+          const row = document.createElement('div');
+          row.className = 'horario-row';
+          row.innerHTML = `<input type="time" name="horario[]" required> <button type="button" onclick="eliminarHorario(this)">✕</button>`;
+          horariosDiv.appendChild(row);
+        }
+      }
+
+      function obtenerConfiguraciones() {
+        mostrarSpinner(true);
+        fetch('/configuracion')
+          .then(res => res.ok ? res.json() : [])
+          .then(data => {
+            configuracionesGuardadas = Array.isArray(data) ? data : [];
+            const diaSeleccionado = document.querySelector('input[name="dias"]:checked');
+            if (diaSeleccionado) cargarHorariosParaDia(diaSeleccionado.value);
+          })
+          .finally(() => mostrarSpinner(false));
+      }
+
+      document.querySelectorAll('input[name="dias"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          cargarHorariosParaDia(this.value);
+        });
+      });
+
+      // Al cargar la página, obtener configuraciones y mostrar horarios del primer día seleccionado
+      window.addEventListener('DOMContentLoaded', function() {
+        obtenerConfiguraciones();
+      });
+
+      document.getElementById('formAlimentador').onsubmit = function(e) {
+        e.preventDefault();
+        const dia = document.querySelector('input[name="dias"]:checked');
+        const horarios = Array.from(document.querySelectorAll('input[name="horario[]"]')).map(input => input.value);
+        if (!dia) {
+          mostrarMensaje('Selecciona un día.');
+          return;
+        }
+        if (horarios.length === 0) {
+          mostrarMensaje('Agrega al menos un horario.');
+          return;
+        }
+        mostrarSpinner(true);
+        fetch('/configurar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dia: dia.value, horarios })
+        })
+        .then(res => res.ok ? res.text() : Promise.reject('Error al guardar'))
+        .then(msg => {
+          mostrarMensaje(msg || '¡Configuración guardada!');
+          // Actualizar la lista local y recargar horarios
+          obtenerConfiguraciones();
+        })
+        .catch(() => mostrarMensaje('Error al enviar la configuración.'))
+        .finally(() => mostrarSpinner(false));
+      };
+      function mostrarMensaje(msg) {
+        document.getElementById('mensaje').textContent = msg;
+      }
+    </script>
+  </body>
+</html>
