@@ -4,172 +4,838 @@
     <meta charset="UTF-8">
     <title>Alimentador Automático para Perros</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.cdnfonts.com/css/google-sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+    <script type="module">
+      import '@material/web/all.js';
+      import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+      document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+    </script>
     <style>
-      html { font-family: sans-serif; text-align: center; }
-      body { margin: 0; padding: 0; background: #f7f7f7; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-      h1 { margin: 1em 0 0.5em 0; }
-      .container { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #0001; padding: 1.5em; max-width: 420px; width: 95vw; margin: 1em auto; }
-      .dias { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5em; margin-bottom: 1.5em; }
-      .dias label { cursor: pointer; display: inline-block; }
-      .dias input { display: none; }
-      .dias span {
-        background: #e0e0e0;
-        border-radius: 6px;
-        padding: 0.5em 1em;
-        transition: background 0.2s, color 0.2s;
-        display: inline-block;
+    :root {
+      --color-primary: #2456e6;
+      --color-primary-dark: #1a3fa0;
+      --color-primary-light: #eaf0fe;
+      --color-accent: #a259e6;
+      --color-bg: #f5f7fd;
+      --color-surface: #fafdff;
+      --color-border: #e0e6f7;
+      --color-text: #1a2340;
+      --color-text-light: #b3c0ff;
+      --color-success: #388e3c;
+      --color-outline: #2456e6;
+      --color-shadow: #2456e622;
+    }
+    /* Responsive navigation bar: íconos en móvil, íconos+texto en escritorio */
+    .md-nav-label {
+      display: none;
+    }
+    @media (min-width: 700px) {
+      .md-nav-label {
+        display: inline;
+        margin-left: 0.5em;
+        font-weight: 500;
+        font-size: 1.08em;
       }
-      .dias input:checked + span {
-        background: #5B5;
-        color: #fff;
+    }
+    /* Animaciones Material Design para el navbar y botones */
+    .navbar nav a {
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s, color 0.2s;
+    }
+    .navbar nav a::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.25);
+      border-radius: 100%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s cubic-bezier(.4,0,.2,1), height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .navbar nav a:active::after {
+      width: 200%;
+      height: 500%;
+      opacity: 1;
+      transition: 0s;
+    }
+    md-filled-button, md-outlined-text-field {
+      transition: box-shadow 0.2s cubic-bezier(.4,0,.2,1), background 0.2s cubic-bezier(.4,0,.2,1);
+    }
+    md-filled-button:active {
+      box-shadow: 0 2px 8px #1976d2aa;
+      background: var(--md-sys-color-primary, #1565c0);
+    }
+    .container, .navbar {
+      transition: box-shadow 0.3s cubic-bezier(.4,0,.2,1), background 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    .container:active {
+      box-shadow: 0 4px 24px #1976d233;
+    }
+    html, body {
+      font-family: 'Product Sans', 'Product Sans Thin', 'Product Sans Light', 'Product Sans Medium', 'Product Sans Black', 'Roboto', Arial, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .container {
+      margin: 2em auto;
+      width: 75vw;
+      background: var(--color-surface);
+      border-radius: 18px;
+      box-shadow: 0 2px 12px var(--color-shadow);
+      padding: 2em 1.2em 2em 1.2em;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* Adaptar md-list y md-list-item a los temas */
+    md-list.horarios {
+      background: var(--color-surface);
+      border-radius: 12px;
+      box-shadow: 0 1px 6px var(--color-shadow);
+      padding: 0.2em 0.1em;
+      margin-bottom: 1.2em;
+      border: 1.5px solid var(--color-border);
+      transition: background 0.3s, box-shadow 0.3s, border 0.3s;
+    }
+    md-list.horarios md-list-item {
+      background: transparent;
+      color: var(--color-text);
+      border-bottom: 1px solid var(--color-border);
+      transition: background 0.3s, color 0.3s;
+    }
+    md-list.horarios md-list-item:last-child {
+      border-bottom: none;
+    }
+    md-list.horarios md-outlined-text-field,
+    md-list.horarios md-icon-button {
+      background: transparent;
+      color: var(--color-text);
+    }
+    md-list.horarios md-outlined-text-field[readonly] {
+      background: transparent;
+      color: var(--color-text);
+    }
+    md-list.horarios md-icon-button span.material-symbols-outlined {
+      color: var(--color-text-light);
+      transition: color 0.3s;
+    }
+    @media (max-width: 700px) {
+      md-list.horarios {
+        border-radius: 8px;
+        padding: 0.1em 0;
       }
-      .horarios { margin-bottom: 1.5em; }
-      .horario-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; margin-bottom: 0.5em; }
-      .horario-row input[type="time"] { font-size: 1em; padding: 0.2em 0.5em; border-radius: 4px; border: 1px solid #ccc; }
-      .horario-row button { background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 0.2em 0.7em; font-size: 1.1em; cursor: pointer; }
-      .add-btn { background: #5B5; color: #fff; border: none; border-radius: 4px; padding: 0.5em 1.2em; font-size: 1.1em; cursor: pointer; margin-bottom: 1em; }
-      .submit-btn { background: #3498db; color: #fff; border: none; border-radius: 4px; padding: 0.7em 2em; font-size: 1.2em; cursor: pointer; margin-top: 1em; }
-      @media (max-width: 600px) {
-        .container { padding: 1em; }
-        h1 { font-size: 1.3em; }
+    }
+    md-filled-button {
+      margin: 0.4em 0.2em;
+      --md-filled-button-container-color: var(--color-primary);
+      --md-filled-button-label-text-color: #fff;
+      --md-filled-button-hover-label-text-color: #fff;
+      --md-filled-button-hover-container-color: var(--color-primary-dark);
+      --md-filled-button-focus-container-color: var(--color-primary-dark);
+      --md-filled-button-disabled-container-color: #e0e6f7;
+      --md-filled-button-disabled-label-text-color: #b3c0ff;
+      font-weight: 500;
+      border-radius: 1.7em;
+      box-shadow: 0 2px 8px var(--color-shadow);
+    }
+    md-filled-button:active {
+      background: var(--color-primary-dark);
+    }
+    md-outlined-text-field {
+      margin-bottom: 1.2em;
+      width: 100%;
+      --md-outlined-field-outline-color: var(--color-outline);
+      --md-outlined-field-label-text-color: var(--color-primary);
+      --md-outlined-field-input-text-color: var(--color-text);
+      --md-outlined-field-focus-outline-color: var(--color-primary);
+      --md-outlined-field-hover-outline-color: var(--color-primary-dark);
+      --md-outlined-field-container-color: var(--color-surface);
+      --md-outlined-field-disabled-outline-color: #e0e6f7;
+    }
+    /* Eliminar el contador de caracteres de los campos de hora/minuto de los md-outlined-text-field */
+    md-outlined-text-field::part(char-counter),
+    md-outlined-text-field .md-char-counter,
+    md-outlined-text-field .mdc-text-field-character-counter,
+    .md-char-counter, .mdc-text-field-character-counter, .char-counter, .field-length-counter,
+    .time-field-counter, .minute-field-counter {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      width: 0 !important;
+      font-size: 0 !important;
+      pointer-events: none !important;
+    }
+    /* Estilos para eliminar el contador de caracteres de los campos de hora/minuto */
+    .md-char-counter, .mdc-text-field-character-counter, .char-counter, .field-length-counter {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      width: 0 !important;
+      font-size: 0 !important;
+      pointer-events: none !important;
+    }
+    /* Quitar el contador de caracteres de los campos de hora/minuto si se usan componentes personalizados */
+    .time-field-counter, .minute-field-counter {
+      display: none !important;
+    }
+      #fecha-hora {
+        margin-bottom: 1em;
+        font-size: 1.1em;
+        color: #555;
+      }
+      .dias {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5em;
+        margin-bottom: 1.5em;
+      }
+      .horarios {
+        margin-bottom: 1.5em;
+      }
+            .dias-semana-col {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5em 1.2em;
+        justify-content: center;
+        width: 100%;
+      }
+      .dia-radio-label {
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+        margin-bottom: 0.2em;
+      }
+      @media (max-width: 700px) {
+        #diasRadioGroup {
+          flex-direction: column !important;
+          align-items: stretch !important;
+        }
+        .dias-semana-col {
+          flex-direction: column !important;
+          gap: 0.2em !important;
+          align-items: flex-start !important;
+        }
+        .dia-radio-label {
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 0.5em !important;
+          width: 100%;
+        }
+        #diasRadioGroup label {
+          margin-bottom: 0.2em;
+        }
+      }
+      #mensaje {
+        font-family: 'Roboto', Arial, sans-serif;
       }
     </style>
   </head>
   <body>
-    <h1>Alimentador Automático para Perros</h1>
-    <div id="fecha-hora" style="margin-bottom:1em;font-size:1.1em;color:#555;"></div>
+    <!-- NAVIGATION BAR INSPIRADA EN MATERIAL WEB DEMO -->
+    <header style="position:sticky;top:0;z-index:100;">
+      <nav id="main-navbar" style="display:flex;align-items:center;justify-content:space-between;background:var(--color-primary);padding:0 1.2em;height:56px;box-shadow:0 2px 8px var(--color-shadow);">
+        <div style="display:flex;align-items:center;gap:0.7em;">
+          <button id="menu-btn" aria-label="Menú" style="background:none;border:none;outline:none;cursor:pointer;padding:0;margin-right:0.5em;display:flex;align-items:center;">
+            <span class="material-symbols-outlined" style="font-size:2em;color:#fff;">menu</span>
+          </button>
+          <span id="navbar-title" style="color:#fff;font-size:1.3em;font-weight:500;letter-spacing:0.01em;">DogFeeder</span>
+        </div>
+        <div id="navbar-actions" style="display:flex;align-items:center;gap:0.5em;">
+          <a href="/" title="Inicio" style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:0.3em;font-size:1.1em;">
+            <span class="material-symbols-outlined" style="font-size:1.6em;">home</span>
+            <span class="md-nav-label" style="display:none;">Inicio</span>
+          </a>
+          <a href="/setupwifi" title="Configura tu WiFi" style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:0.3em;font-size:1.1em;">
+            <span class="material-symbols-outlined" style="font-size:1.6em;">wifi</span>
+            <span class="md-nav-label" style="display:none;">Configura tu WiFi</span>
+          </a>
+        </div>
+      </nav>
+      <aside id="drawer" style="position:fixed;top:0;left:0;width:270px;max-width:90vw;height:100vh;background:var(--color-primary-light);box-shadow:2px 0 16px var(--color-shadow);z-index:200;transform:translateX(-100%);transition:transform 0.25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;">
+        <div style="height:56px;display:flex;align-items:center;padding-left:1.2em;">
+          <span style="color:var(--color-primary);font-size:1.2em;font-weight:500;">DogFeeder</span>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--color-border);margin:0 0 0.5em 0;">
+        <a href="/" style="color:var(--color-primary);text-decoration:none;display:flex;align-items:center;gap:0.7em;padding:0.9em 1.5em;font-size:1.1em;">
+          <span class="material-symbols-outlined" style="font-size:1.5em;">home</span>
+          <span>Inicio</span>
+        </a>
+        <a href="/setupwifi" style="color:var(--color-primary);text-decoration:none;display:flex;align-items:center;gap:0.7em;padding:0.9em 1.5em;font-size:1.1em;">
+          <span class="material-symbols-outlined" style="font-size:1.5em;">wifi</span>
+          <span>Configura tu WiFi</span>
+        </a>
+        <div style="flex:1 1 auto;"></div>
+        <!-- Theme toggle button group -->
+        <div id="theme-toggle-group" style="padding:1.2em 1.2em 1.5em 1.2em;display:flex;justify-content:center;align-items:center;">
+          <div id="theme-toggle" style="display:flex;gap:0.1em;background:none;border-radius:2em;border:1.5px solid var(--color-border);overflow:hidden;box-shadow:0 1px 6px #0002;">
+            <button id="theme-dark" aria-label="Oscuro" style="background:none;border:none;outline:none;padding:0.5em 1.1em;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.5em;color:var(--color-text-light);transition:background 0.2s, color 0.2s;"><span class="material-symbols-outlined">dark_mode</span></button>
+            <button id="theme-auto" aria-label="Auto" style="background:none;border:none;outline:none;padding:0.5em 1.1em;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.5em;color:var(--color-text-light);transition:background 0.2s, color 0.2s;"><span class="material-symbols-outlined">contrast</span></button>
+            <button id="theme-light" aria-label="Claro" style="background:none;border:none;outline:none;padding:0.5em 1.1em;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.5em;color:var(--color-text-light);transition:background 0.2s, color 0.2s;"><span class="material-symbols-outlined">light_mode</span></button>
+          </div>
+        </div>
+      </aside>
+    <style>
+      /* Theme toggle group styles */
+      #theme-toggle-group {
+        user-select: none;
+      }
+      #theme-toggle button {
+        border-radius: 0;
+        border: none;
+        background: none;
+        color: var(--color-text-light);
+        transition: background 0.18s, color 0.18s;
+      }
+      #theme-toggle button.selected {
+        background: var(--color-accent);
+        color: #fff;
+      }
+      #theme-toggle button:focus {
+        outline: 2px solid var(--color-primary);
+        z-index: 2;
+      }
+    </style>
+    <script>
+    // --- THEME TOGGLE LOGIC ---
+    const themeVars = {
+      light: {
+        '--color-primary': '#2456e6',
+        '--color-primary-dark': '#1a3fa0',
+        '--color-primary-light': '#eaf0fe',
+        '--color-accent': '#a259e6',
+        '--color-bg': '#f5f7fd',
+        '--color-surface': '#fafdff',
+        '--color-border': '#e0e6f7',
+        '--color-text': '#1a2340',
+        '--color-text-light': '#b3c0ff',
+        '--color-success': '#388e3c',
+        '--color-outline': '#2456e6',
+        '--color-shadow': '#2456e622',
+      },
+      dark: {
+        '--color-primary': '#3a53e6',
+        '--color-primary-dark': '#1a2340',
+        '--color-primary-light': '#23263a',
+        '--color-accent': '#a259e6',
+        '--color-bg': '#181a23',
+        '--color-surface': '#23263a',
+        '--color-border': '#35395a',
+        '--color-text': '#eaf0fe',
+        '--color-text-light': '#b3c0ff',
+        '--color-success': '#7be67b',
+        '--color-outline': '#a259e6',
+        '--color-shadow': '#000a',
+      }
+    };
+    function setTheme(mode) {
+      let vars = themeVars.light;
+      if (mode === 'dark') vars = themeVars.dark;
+      else if (mode === 'auto') vars = window.matchMedia('(prefers-color-scheme: dark)').matches ? themeVars.dark : themeVars.light;
+      for (const k in vars) document.documentElement.style.setProperty(k, vars[k]);
+      // Botón seleccionado
+      document.querySelectorAll('#theme-toggle button').forEach(btn => btn.classList.remove('selected'));
+      document.getElementById('theme-' + mode).classList.add('selected');
+    }
+    // Guardar preferencia en localStorage
+    function saveThemePref(mode) {
+      localStorage.setItem('theme-mode', mode);
+    }
+    function loadThemePref() {
+      return localStorage.getItem('theme-mode') || 'auto';
+    }
+    // Inicializar
+    function initThemeToggle() {
+      const mode = loadThemePref();
+      setTheme(mode);
+      document.getElementById('theme-dark').onclick = () => { setTheme('dark'); saveThemePref('dark'); };
+      document.getElementById('theme-light').onclick = () => { setTheme('light'); saveThemePref('light'); };
+      document.getElementById('theme-auto').onclick = () => { setTheme('auto'); saveThemePref('auto'); };
+      // Cambia automáticamente si el usuario cambia el sistema
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (loadThemePref() === 'auto') setTheme('auto');
+      });
+    }
+    window.addEventListener('DOMContentLoaded', initThemeToggle);
+    </script>
+      <div id="drawer-backdrop" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;z-index:150;"></div>
+    </header>
+    <style>
+      @media (min-width: 700px) {
+        .md-nav-label { display: inline !important; }
+      }
+      @media (max-width: 699px) {
+        .md-nav-label { display: none !important; }
+      }
+      @media (max-width: 699px) {
+        #navbar-title { font-size: 1.1em !important; }
+      }
+      #drawer.open {
+        transform: translateX(0%) !important;
+      }
+      #drawer-backdrop.open {
+        display: block !important;
+      }
+    </style>
+    <script>
+      // Drawer funcional tipo Material Web
+      const drawer = document.getElementById('drawer');
+      const menuBtn = document.getElementById('menu-btn');
+      const drawerBackdrop = document.getElementById('drawer-backdrop');
+      menuBtn.addEventListener('click', () => {
+        drawer.classList.add('open');
+        drawerBackdrop.classList.add('open');
+      });
+      drawerBackdrop.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        drawerBackdrop.classList.remove('open');
+      });
+      // Cerrar con Escape
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          drawer.classList.remove('open');
+          drawerBackdrop.classList.remove('open');
+        }
+      });
+    </script>
+    <div class="content-container">
+    <div class="container description">
+        <h1 >Alimentador Automático para Perros</h1>
+        <h2 id="fecha-hora"></div>
+    </div>
     <div class="container">
       <form id="formAlimentador" autocomplete="off">
-        <h2>Días de la semana</h2>
+        <h2 style="margin-bottom:0.5em;">Días de la semana</h2>
         <div class="dias">
-          <label><input type="radio" name="dias" value="L"><span>Lun</span></label>
-          <label><input type="radio" name="dias" value="M"><span>Mar</span></label>
-          <label><input type="radio" name="dias" value="X"><span>Mié</span></label>
-          <label><input type="radio" name="dias" value="J"><span>Jue</span></label>
-          <label><input type="radio" name="dias" value="V"><span>Vie</span></label>
-          <label><input type="radio" name="dias" value="S"><span>Sáb</span></label>
-          <label><input type="radio" name="dias" value="D"><span>Dom</span></label>
+          <md-radio-group id="diasRadioGroup" name="dias" style="display:flex;flex-direction:column;gap:0.3em;align-items:center;">
+            <div class="dias-semana-col">
+              <div class="dia-radio-label"><md-radio id="monday" name="dias" value="L" label="Lunes"></md-radio><label for="monday">Lunes</label></div>
+              <div class="dia-radio-label"><md-radio id="tuesday" name="dias" value="M" label="Martes"></md-radio><label for="tuesday">Martes</label></div>
+              <div class="dia-radio-label"><md-radio id="wednesday" name="dias" value="X" label="Miércoles"></md-radio><label for="wednesday">Miércoles</label></div>
+              <div class="dia-radio-label"><md-radio id="thursday" name="dias" value="J" label="Jueves"></md-radio><label for="thursday">Jueves</label></div>
+              <div class="dia-radio-label"><md-radio id="friday" name="dias" value="V" label="Viernes"></md-radio><label for="friday">Viernes</label></div>
+              <div class="dia-radio-label"><md-radio id="saturday" name="dias" value="S" label="Sábado"></md-radio><label for="saturday">Sábado</label></div>
+              <div class="dia-radio-label"><md-radio id="sunday" name="dias" value="D" label="Domingo"></md-radio><label for="sunday">Domingo</label></div>
+            </div>
+          </md-radio-group>
         </div>
-        <h2>Horarios de alimentación</h2>
-        <div class="horarios" id="horarios"></div>
-        <button type="button" class="add-btn" onclick="agregarHorario()">Agregar horario</button>
-        <br>
-        <button type="submit" class="submit-btn">Guardar configuración</button>
+        <h2 style="margin-bottom:0.5em;">Horarios de alimentación</h2>
+        <md-list class="horarios" id="horarios"></md-list>
+        <md-filled-button type="button" id="btnAgregarHorario" >Agregar horario</md-filled-button>
+        <md-filled-button type="submit" id="btnGuardarConfig" >Guardar configuración</md-filled-button>
       </form>
-      <div id="mensaje" style="margin-top:1em;color:#27ae60;font-weight:bold;"></div>
-      <div id="spinner" style="display:none;margin-top:1em;"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" stroke="#3498db" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60"><animateTransform attributeName="transform" type="rotate" from="0 20 20" to="360 20 20" dur="1s" repeatCount="indefinite"/></circle></svg></div>
-      <button type="button" class="submit-btn" id="btnAlimentarAhora" style="background:#e74c3c;margin-top:1em;">Alimentar ahora</button>
+      <br>
+      <md-divider></md-divider>
+      <div id="mensaje" style="position:fixed;top:1.5em;right:1.5em;z-index:1000;min-width:220px;max-width:90vw;display:none;"></div>
+      <div id="spinner" style="display:none;margin-top:1em;"><md-circular-progress four-color indeterminate></md-circular-progress></div>
+      <br>
+      <md-filled-button id="btnAlimentarAhora">Alimentar ahora</md-filled-button>
     </div>
+    </div>
+
     <script>
     function mostrarSpinner(mostrar) {
-        document.getElementById('spinner').style.display = mostrar ? '' : 'none';
-      }
-      // Alimentar ahora
-      document.getElementById('btnAlimentarAhora').onclick = function() {
-        mostrarSpinner(true);
-        fetch('/alimentar', { method: 'POST' })
-          .then(res => res.ok ? res.text() : Promise.reject('Error al alimentar'))
-          .then(msg => mostrarMensaje(msg || '¡Alimentación manual activada!'))
-          .catch(() => mostrarMensaje('Error al activar alimentación.'))
-          .finally(() => mostrarSpinner(false));
-      };
-      // Mostrar día y hora actual
-      function actualizarFechaHora() {
-        const fecha = new Date();
-        const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-        const dia = dias[fecha.getDay()];
-        const hora = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const fechaStr = `${dia} ${fecha.toLocaleDateString('es-ES')} - ${hora}`;
-        document.getElementById('fecha-hora').textContent = fechaStr;
-      }
-      setInterval(actualizarFechaHora, 1000);
-      actualizarFechaHora();
-      function agregarHorario() {
-        const horarios = document.getElementById('horarios');
-        const row = document.createElement('div');
-        row.className = 'horario-row';
-        row.innerHTML = `<input type="time" name="horario[]" required> <button type="button" onclick="eliminarHorario(this)">✕</button>`;
-        horarios.appendChild(row);
-      }
-      function eliminarHorario(btn) {
-        const row = btn.parentNode;
-        row.parentNode.removeChild(row);
-      }
-      // --- Manejo de horarios según el día seleccionado ---
-      let configuracionesGuardadas = [];
+      document.getElementById('spinner').style.display = mostrar ? '' : 'none';
+      // Deshabilitar/habilitar todos los botones Material
+      const botones = document.querySelectorAll('md-filled-button, button');
+      botones.forEach(btn => btn.disabled = mostrar);
+    }
 
-      function cargarHorariosParaDia(dia) {
-        const horariosDiv = document.getElementById('horarios');
-        horariosDiv.innerHTML = '';
-        const horariosParaDia = configuracionesGuardadas.filter(conf => conf.dia === dia).map(conf => conf.horario);
-        if (horariosParaDia.length) {
-          horariosParaDia.forEach(horario => {
-            const row = document.createElement('div');
-            row.className = 'horario-row';
-            row.innerHTML = `<input type="time" name="horario[]" required value="${horario}"> <button type="button" onclick="eliminarHorario(this)">✕</button>`;
-            horariosDiv.appendChild(row);
-          });
-        } else {
-          const row = document.createElement('div');
-          row.className = 'horario-row';
-          row.innerHTML = `<input type="time" name="horario[]" required> <button type="button" onclick="eliminarHorario(this)">✕</button>`;
-          horariosDiv.appendChild(row);
-        }
-      }
-
-      function obtenerConfiguraciones() {
-        mostrarSpinner(true);
-        fetch('/configuracion')
-          .then(res => res.ok ? res.json() : [])
-          .then(data => {
-            configuracionesGuardadas = Array.isArray(data) ? data : [];
-            const diaSeleccionado = document.querySelector('input[name="dias"]:checked');
-            if (diaSeleccionado) cargarHorariosParaDia(diaSeleccionado.value);
-          })
-          .finally(() => mostrarSpinner(false));
-      }
-
-      document.querySelectorAll('input[name="dias"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-          cargarHorariosParaDia(this.value);
+    // Alimentar ahora
+    document.getElementById('btnAlimentarAhora').onclick = function() {
+      const btn = document.getElementById('btnAlimentarAhora');
+      const textoOriginal = btn.textContent;
+      btn.textContent = 'Alimentando';
+      mostrarSpinner(true);
+      fetch('/alimentar', { method: 'POST' })
+        .then(res => res.ok ? res.text() : Promise.reject('Error al alimentar'))
+        .then(msg => mostrarMensaje(msg || '¡Alimentación manual completada!'))
+        .catch(() => mostrarMensaje('Error al activar alimentación.', 'error'))
+        .finally(() => {
+          btn.textContent = textoOriginal;
+          mostrarSpinner(false);
         });
-      });
+    };
 
-      // Al cargar la página, obtener configuraciones y mostrar horarios del primer día seleccionado
-      window.addEventListener('DOMContentLoaded', function() {
-        obtenerConfiguraciones();
-      });
+    // Mostrar día y hora actual
+    function actualizarFechaHora() {
+      const fecha = new Date();
+      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      const dia = dias[fecha.getDay()];
+      const hora = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const fechaStr = `${dia} ${fecha.toLocaleDateString('es-ES')} - ${hora}`;
+      document.getElementById('fecha-hora').textContent = fechaStr;
+    }
+    setInterval(actualizarFechaHora, 1000);
+    actualizarFechaHora();
 
-      document.getElementById('formAlimentador').onsubmit = function(e) {
-        e.preventDefault();
-        const dia = document.querySelector('input[name="dias"]:checked');
-        const horarios = Array.from(document.querySelectorAll('input[name="horario[]"]')).map(input => input.value);
-        if (!dia) {
-          mostrarMensaje('Selecciona un día.');
-          return;
-        }
-        if (horarios.length === 0) {
-          mostrarMensaje('Agrega al menos un horario.');
-          return;
-        }
-        mostrarSpinner(true);
-        fetch('/configurar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dia: dia.value, horarios })
-        })
-        .then(res => res.ok ? res.text() : Promise.reject('Error al guardar'))
-        .then(msg => {
-          mostrarMensaje(msg || '¡Configuración guardada!');
-          // Actualizar la lista local y recargar horarios
-          obtenerConfiguraciones();
-        })
-        .catch(() => mostrarMensaje('Error al enviar la configuración.'))
-        .finally(() => mostrarSpinner(false));
-      };
-      function mostrarMensaje(msg) {
-        document.getElementById('mensaje').textContent = msg;
+
+function agregarHorario(valor = '') {
+  const horarios = document.getElementById('horarios');
+  const item = document.createElement('md-list-item');
+  item.innerHTML = `
+    <div class="md-time-picker-mobile" style="display:none;align-items:center;gap:0.5em;width:100%;padding:5px 0;">
+      <md-outlined-text-field
+        type="time"
+        name="horario[]"
+        required
+        value="${valor}"
+        style="width:100%"
+      ></md-outlined-text-field>
+      <md-icon-button type="button" onclick="eliminarHorario(this)" aria-label="Eliminar horario"><span class="material-symbols-outlined">close</span></md-icon-button>
+    </div>
+    <div class="md-time-picker-container" style="display:flex;align-items:center;gap:0.5em;width:100%;padding:5px 0;">
+      <md-outlined-text-field
+        name="horario[]"
+        required
+        readonly
+        value="${valor}"
+        label="Hora"
+        class="md-time-picker-input"
+        style="flex:1 1 0%;width:100%;min-width:0;box-sizing:border-box;"
+        onclick="mostrarTimePicker(this)"
+        tabindex="0"
+      >
+        <md-icon slot="trailing-icon">schedule</md-icon>
+      </md-outlined-text-field>
+      <md-icon-button type="button" onclick="eliminarHorario(this)" aria-label="Eliminar horario"><span class="material-symbols-outlined">close</span></md-icon-button>
+    </div>
+  `;
+  horarios.appendChild(item);
+  ajustarPickerVisibilidad();
+}
+
+// Mostrar/ocultar el picker correcto según el tamaño de pantalla
+function ajustarPickerVisibilidad() {
+  const isMobile = window.matchMedia('(max-width: 700px)').matches;
+  document.querySelectorAll('.md-time-picker-mobile').forEach(el => {
+    el.style.display = isMobile ? 'flex' : 'none';
+  });
+  document.querySelectorAll('.md-time-picker-container').forEach(el => {
+    el.style.display = isMobile ? 'none' : 'flex';
+  });
+}
+
+window.addEventListener('resize', ajustarPickerVisibilidad);
+window.addEventListener('DOMContentLoaded', ajustarPickerVisibilidad);
+// --- Custom Material Time Picker ---
+let timePickerDialog = null;
+function mostrarTimePicker(input) {
+  cerrarTimePicker();
+  // Crear el diálogo si no existe
+  timePickerDialog = document.createElement('dialog');
+  timePickerDialog.className = 'md-time-picker-dialog';
+  timePickerDialog.style.padding = '0';
+  timePickerDialog.style.border = 'none';
+  timePickerDialog.style.borderRadius = '18px';
+  timePickerDialog.style.boxShadow = '0 2px 12px #0003';
+  timePickerDialog.style.background = 'var(--md-sys-color-surface, #fff)';
+  timePickerDialog.innerHTML = `
+    <form method="dialog" style="margin:0;padding:1.5em 1.5em 1em 1.5em;display:flex;flex-direction:column;align-items:center;gap:1.2em;min-width:220px;">
+      <div style="display:flex;align-items:center;gap:0.7em;width:100%;">
+        <md-outlined-text-field
+          id="mdTimeHour"
+          type="text"
+          maxlength="2"
+          pattern="\\d{2}"
+          style="flex:1 1 0%;min-width:0;text-align:center;"
+          label="Hora"
+          value="12"
+          inputmode="numeric"
+        ></md-outlined-text-field>
+        <span style="font-size:2em;color:var(--md-sys-color-on-surface,#888);">:</span>
+        <md-outlined-text-field
+          id="mdTimeMinute"
+          type="text"
+          maxlength="2"
+          pattern="\\d{2}"
+          style="flex:1 1 0%;min-width:0;text-align:center;"
+          label="Minutos"
+          value="00"
+          inputmode="numeric"
+        ></md-outlined-text-field>
+        <md-outlined-select id="mdTimeAMPM">
+            <md-select-option selected value="AM">
+                <div slot="headline">AM</div>
+            </md-select-option>
+            <md-select-option value="PM">
+                <div slot="headline">PM</div>
+            </md-select-option>
+        </md-outlined-select>
+      </div>
+      <div style="display:flex;gap:1em;justify-content:center;">
+        <md-filled-button type="button" id="mdTimeCancel">Cancelar</md-filled-button>
+        <md-filled-button type="submit" id="mdTimeOk" style="background:var(--md-sys-color-primary,#808000);">Aceptar</md-filled-button>
+      </div>
+    </form>
+  `;
+  document.body.appendChild(timePickerDialog);
+  // Centrar el diálogo en la pantalla
+  timePickerDialog.style.position = 'fixed';
+  timePickerDialog.style.inset = '0';
+  timePickerDialog.style.margin = 'auto';
+  timePickerDialog.style.left = '';
+  timePickerDialog.style.top = '';
+  timePickerDialog.style.transform = '';
+  // Setear valores actuales
+  let hora = '12', minuto = '00', ampm = 'AM';
+  if (input.value && /^\d{2}:\d{2}$/.test(input.value)) {
+    let [h, m] = input.value.split(':');
+    h = parseInt(h, 10);
+    ampm = h >= 12 ? 'PM' : 'AM';
+    if (h === 0) h = 12;
+    else if (h > 12) h = h - 12;
+    hora = h.toString().padStart(2, '0');
+    minuto = m;
+  }
+  timePickerDialog.querySelector('#mdTimeHour').value = hora;
+  timePickerDialog.querySelector('#mdTimeMinute').value = minuto;
+  timePickerDialog.querySelector('#mdTimeAMPM').value = ampm;
+
+  // Validación y sincronización en tiempo real con el input móvil
+  function syncMobileInput() {
+    let h = timePickerDialog.querySelector('#mdTimeHour').value;
+    let m = timePickerDialog.querySelector('#mdTimeMinute').value;
+    let ap = timePickerDialog.querySelector('#mdTimeAMPM').value;
+    // Solo acepta dos dígitos
+    h = h.replace(/\D/g, '').slice(0,2);
+    m = m.replace(/\D/g, '').slice(0,2);
+    if (h.length === 1) h = '0' + h;
+    if (h.length === 0) h = '12';
+    if (parseInt(h,10) < 1) h = '12';
+    if (parseInt(h,10) > 12) h = '12';
+    if (m.length === 1) m = '0' + m;
+    if (m.length === 0) m = '00';
+    if (parseInt(m,10) > 59) m = '59';
+    // Convertir a 24h
+    let h24 = parseInt(h,10);
+    if (ap === 'PM' && h24 < 12) h24 += 12;
+    if (ap === 'AM' && h24 === 12) h24 = 0;
+    let value24 = h24.toString().padStart(2,'0') + ':' + m;
+    input.value = value24;
+    input.setAttribute('value', value24);
+    // Sincronizar el input móvil si existe
+    const parent = input.closest('md-list-item');
+    if (parent) {
+      const mobileInput = parent.querySelector('.md-time-picker-mobile md-outlined-text-field[type="time"]');
+      if (mobileInput) {
+        mobileInput.value = value24;
+        mobileInput.setAttribute('value', value24);
       }
+    }
+  }
+  timePickerDialog.querySelector('#mdTimeHour').addEventListener('input', syncMobileInput);
+  timePickerDialog.querySelector('#mdTimeMinute').addEventListener('input', syncMobileInput);
+  timePickerDialog.querySelector('#mdTimeAMPM').addEventListener('change', syncMobileInput);
+  // Cancelar
+  timePickerDialog.querySelector('#mdTimeCancel').onclick = (e) => {
+    e.preventDefault();
+    cerrarTimePicker();
+  };
+  // Aceptar
+  timePickerDialog.querySelector('form').onsubmit = (e) => {
+    e.preventDefault();
+    syncMobileInput();
+    cerrarTimePicker();
+  };
+  // Abrir
+  timePickerDialog.showModal();
+  // Cerrar al hacer click fuera
+  timePickerDialog.addEventListener('click', function(e) {
+    if (e.target === timePickerDialog) cerrarTimePicker();
+  });
+  // Cerrar con Escape
+  timePickerDialog.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarTimePicker();
+  });
+}
+function cerrarTimePicker() {
+  if (timePickerDialog) {
+    timePickerDialog.close();
+    timePickerDialog.remove();
+    timePickerDialog = null;
+  }
+}
+function eliminarHorario(btn) {
+  const item = btn.closest('md-list-item');
+  if (item) item.remove();
+}
+
+    let configuracionesGuardadas = [];
+
+function cargarHorariosParaDia(dia) {
+  const horariosDiv = document.getElementById('horarios');
+  horariosDiv.innerHTML = '';
+  // Buscar todas las configuraciones para el día seleccionado
+  const confsDia = configuracionesGuardadas.filter(conf => conf.dia === dia);
+  let horariosParaDia = [];
+  confsDia.forEach(conf => {
+    if (Array.isArray(conf.horario)) {
+      horariosParaDia = horariosParaDia.concat(conf.horario);
+    } else if (typeof conf.horario === 'string') {
+      horariosParaDia.push(conf.horario);
+    }
+  });
+  if (horariosParaDia.length) {
+    horariosParaDia.forEach(horario => agregarHorario(horario));
+  } else {
+    agregarHorario();
+  }
+}
+
+
+    function obtenerConfiguraciones() {
+      mostrarSpinner(true);
+      fetch('/configuracion')
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          configuracionesGuardadas = Array.isArray(data) ? data : [];
+          const radioGroup = document.getElementById('diasRadioGroup');
+          if (radioGroup && radioGroup.value) cargarHorariosParaDia(radioGroup.value);
+        })
+        .finally(() => mostrarSpinner(false));
+    }
+
+    // Manejo de selección de día con Material Radio
+    document.getElementById('diasRadioGroup').addEventListener('change', function(e) {
+      const value = e.target.value;
+      if (value) cargarHorariosParaDia(value);
+    });
+
+    // Al cargar la página, seleccionar automáticamente el día actual y obtener configuraciones
+    window.addEventListener('DOMContentLoaded', function() {
+      // Seleccionar el radio button del día actual automáticamente
+      const diasMap = ["D", "L", "M", "X", "J", "V", "S"];
+      const hoy = new Date().getDay(); // 0=Domingo, 1=Lunes, ...
+      const valorDia = diasMap[hoy];
+      const radioGroup = document.getElementById('diasRadioGroup');
+      if (radioGroup) {
+        // Selecciona el radio button correspondiente
+        const radio = radioGroup.querySelector(`md-radio[value="${valorDia}"]`);
+        if (radio) {
+          radio.checked = true;
+          // Para compatibilidad con el value del grupo
+          radioGroup.value = valorDia;
+        }
+      }
+      obtenerConfiguraciones();
+      // Cargar horarios para el día seleccionado
+      if (radioGroup) cargarHorariosParaDia(valorDia);
+    });
+
+    document.getElementById('btnAgregarHorario').onclick = function() {
+      agregarHorario();
+    };
+
+document.getElementById('formAlimentador').onsubmit = function(e) {
+  e.preventDefault();
+  // Obtener el día seleccionado correctamente del radio button marcado
+  let dia = '';
+  const radios = document.querySelectorAll('#diasRadioGroup md-radio');
+  radios.forEach(radio => {
+    if (radio.checked) dia = radio.value;
+  });
+  // Tomar todos los horarios, asegurando formato HH:MM
+  const horarios = Array.from(document.querySelectorAll('md-list-item md-outlined-text-field[name="horario[]"]')).map(input => {
+    let v = input.value || '';
+    if (/^\d{2}:\d{2}$/.test(v)) return v;
+    if (v.length === 5 && v[2] === ':') return v;
+    return '';
+  }).filter(v => v);
+  if (!dia) {
+    mostrarMensaje('Selecciona un día.', 'error');
+    return;
+  }
+  if (!horarios.length) {
+    mostrarMensaje('Agrega al menos un horario.', 'error');
+    return;
+  }
+  const btnGuardar = document.getElementById('btnGuardarConfig');
+  const textoOriginal = btnGuardar.textContent;
+  btnGuardar.textContent = 'Guardando configuración';
+  mostrarSpinner(true);
+  fetch('/configurar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dia: dia, horarios })
+  })
+  .then(res => res.ok ? res.text() : Promise.reject('Error al guardar'))
+  .then(msg => {
+    mostrarMensaje(msg || '¡Configuración guardada!');
+    obtenerConfiguraciones();
+  })
+  .catch(() => mostrarMensaje('Error al enviar la configuración.', 'error'))
+  .finally(() => {
+    btnGuardar.textContent = textoOriginal;
+    mostrarSpinner(false);
+  });
+};
+
+    // Notificación tipo toast con Material
+    function mostrarMensaje(msg, tipo = 'ok') {
+      const mensajeDiv = document.getElementById('mensaje');
+      mensajeDiv.innerHTML = `
+        <div class="md3-snackbar" style="display:flex;align-items:center;gap:1em;min-width:220px;max-width:90vw;padding:0.9em 1.5em 0.9em 1.2em;background:var(--md-sys-color-surface-container-high,#fff);border-radius:16px;box-shadow:0 4px 24px #0003;position:relative;">
+          <span class="material-symbols-outlined" style="font-size:1.6em;color:${tipo === 'ok' ? '#27ae60' : '#e74c3c'};">
+            ${tipo === 'ok' ? 'check_circle' : 'error'}
+          </span>
+          <span style="font-family:inherit;font-size:1.08em;font-weight:500;color:var(--md-sys-color-on-surface,#222);text-align:left;flex:1;">${msg}</span>
+          <md-icon-button id="cerrarMensaje" aria-label="Cerrar" style="margin-left:0.5em;">
+            <span class="material-symbols-outlined">close</span>
+          </md-icon-button>
+        </div>
+      `;
+      mensajeDiv.style.display = '';
+      mensajeDiv.style.position = 'fixed';
+      mensajeDiv.style.top = '1.5em';
+      mensajeDiv.style.right = '1.5em';
+      mensajeDiv.style.background = 'transparent';
+      mensajeDiv.style.border = 'none';
+      mensajeDiv.style.boxShadow = 'none';
+      mensajeDiv.style.padding = '0';
+      mensajeDiv.style.fontSize = '1em';
+      mensajeDiv.style.transition = 'opacity 0.7s';
+      mensajeDiv.style.opacity = '1';
+      // Cerrar manualmente
+      document.getElementById('cerrarMensaje').onclick = function() {
+        ocultarMensaje();
+      };
+      // Desaparecer automáticamente
+      clearTimeout(mensajeDiv._timeoutFade);
+      mensajeDiv._timeoutFade = setTimeout(() => {
+        mensajeDiv.style.opacity = '0';
+        mensajeDiv._timeoutHide = setTimeout(() => ocultarMensaje(), 700);
+      }, 5000);
+    }
+    function ocultarMensaje() {
+      const mensajeDiv = document.getElementById('mensaje');
+      mensajeDiv.style.display = 'none';
+      mensajeDiv.innerHTML = '';
+      mensajeDiv.style.opacity = '1';
+      clearTimeout(mensajeDiv._timeoutFade);
+      clearTimeout(mensajeDiv._timeoutHide);
+    }
     </script>
   </body>
 </html>
