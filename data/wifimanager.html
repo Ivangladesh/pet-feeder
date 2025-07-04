@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.cdnfonts.com/css/google-sans" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+  </script>
+  <style>
+    :root {
+      --color-primary: #2456e6;
+      --color-primary-dark: #1a3fa0;
+      --color-primary-light: #eaf0fe;
+      --color-accent: #a259e6;
+      --color-bg: #f5f7fd;
+      --color-surface: #fafdff;
+      --color-border: #e0e6f7;
+      --color-text: #1a2340;
+      --color-text-light: #b3c0ff;
+      --color-success: #388e3c;
+      --color-outline: #2456e6;
+      --color-shadow: #2456e622;
+    }
+    body, html {
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+    /* Animaciones Material Design para el navbar y botones */
+    .navbar nav a {
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s, color 0.2s;
+    }
+    .navbar nav a::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.25);
+      border-radius: 100%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s cubic-bezier(.4,0,.2,1), height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .navbar nav a:active::after {
+      width: 200%;
+      height: 500%;
+      opacity: 1;
+      transition: 0s;
+    }
+    md-filled-button, md-outlined-text-field {
+      transition: box-shadow 0.2s cubic-bezier(.4,0,.2,1), background 0.2s cubic-bezier(.4,0,.2,1);
+    }
+    md-filled-button:active {
+      box-shadow: 0 2px 8px #1976d2aa;
+      background: var(--md-sys-color-primary, #1565c0);
+    }
+    .container, .navbar {
+      transition: box-shadow 0.3s cubic-bezier(.4,0,.2,1), background 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    .container:active {
+      box-shadow: 0 4px 24px #1976d233;
+    }
+    html, body {
+      font-family: 'Product Sans', 'Product Sans Thin', 'Product Sans Light', 'Product Sans Medium', 'Product Sans Black', 'Roboto', Arial, sans-serif;
+      background: var(--md-sys-color-surface, #f7f7f7);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .container {
+      margin: 2em auto;
+      width: 95vw;
+      max-width: 420px;
+      background: var(--color-surface);
+      border-radius: 18px;
+      box-shadow: 0 2px 12px var(--color-shadow);
+      padding: 2em 1.2em 2em 1.2em;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      .container {
+        width: 98vw;
+        min-width: 0;
+        max-width: 99vw;
+        margin: 1em 0.5vw;
+        padding: 1.2em 0.5em 1.2em 0.5em;
+      }
+    }
+    md-filled-button {
+      margin: 0.4em 0.2em;
+      --md-filled-button-container-color: var(--color-primary);
+      --md-filled-button-label-text-color: #fff;
+      --md-filled-button-hover-label-text-color: #fff;
+      --md-filled-button-hover-container-color: var(--color-primary-dark);
+      --md-filled-button-focus-container-color: var(--color-primary-dark);
+      --md-filled-button-disabled-container-color: #e0e6f7;
+      --md-filled-button-disabled-label-text-color: #b3c0ff;
+      font-weight: 500;
+      border-radius: 1.7em;
+      box-shadow: 0 2px 8px var(--color-shadow);
+    }
+    md-filled-button:active {
+      background: var(--color-primary-dark);
+    }
+    label {
+      display: block;
+      margin-top: 1em;
+      color: #444;
+      text-align: left;
+      font-weight: 500;
+    }
+    input[type=text], input[type=password] {
+      width: 100%;
+      padding: 0.7em;
+      margin-top: 0.3em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+      font-family: inherit;
+      background: #fafbfc;
+      box-sizing: border-box;
+    }
+    md-outlined-text-field {
+      margin-bottom: 1.2em;
+      width: 100%;
+      --md-outlined-field-outline-color: var(--color-outline);
+      --md-outlined-field-label-text-color: var(--color-primary);
+      --md-outlined-field-input-text-color: var(--color-text);
+      --md-outlined-field-focus-outline-color: var(--color-primary);
+      --md-outlined-field-hover-outline-color: var(--color-primary-dark);
+      --md-outlined-field-container-color: var(--color-surface);
+      --md-outlined-field-disabled-outline-color: #e0e6f7;
+    }
+    .msg {
+      margin-top: 1em;
+      text-align: center;
+      color: #388e3c;
+      font-size: 1.1em;
+      font-family: 'Roboto', Arial, sans-serif;
+    }
+    @media (max-width: 600px) {
+      .navbar nav {
+        display: none;
+        flex-direction: column;
+        background: #1976d2;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 100vw;
+        z-index: 100;
+        padding: 0.5em 0;
+      }
+      .navbar.open nav {
+        display: flex;
+      }
+      .navbar .menu-btn {
+        display: block;
+      }
+    }
+    .menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2em;
+      cursor: pointer;
+      margin-left: 1em;
+    }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+    .container { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 2em; }
+    h2 { text-align: center; color: #333; }
+    label { display: block; margin-top: 1em; color: #444; }
+    input[type=text], input[type=password] { width: 100%; padding: 0.7em; margin-top: 0.3em; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 0.8em; margin-top: 1.5em; background: #2196f3; color: #fff; border: none; border-radius: 4px; font-size: 1em; cursor: pointer; }
+    button:hover { background: #1976d2; }
+    .msg { margin-top: 1em; text-align: center; color: #388e3c; }
+  </style>
+</head>
+<body>
+    <!-- NAVIGATION BAR INSPIRADA EN MATERIAL WEB DEMO -->
+    <header style="position:sticky;top:0;z-index:100;">
+      <nav id="main-navbar" style="display:flex;align-items:center;justify-content:space-between;background:var(--color-primary);padding:0 1.2em;height:56px;box-shadow:0 2px 8px var(--color-shadow);">
+        <div style="display:flex;align-items:center;gap:0.7em;">
+          <button id="menu-btn" aria-label="Menú" style="background:none;border:none;outline:none;cursor:pointer;padding:0;margin-right:0.5em;display:flex;align-items:center;">
+            <span class="material-symbols-outlined" style="font-size:2em;color:#fff;">menu</span>
+          </button>
+          <span id="navbar-title" style="color:#fff;font-size:1.3em;font-weight:500;letter-spacing:0.01em;">DogFeeder</span>
+        </div>
+        <div id="navbar-actions" style="display:flex;align-items:center;gap:0.5em;">
+          <a href="/" title="Inicio" style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:0.3em;font-size:1.1em;">
+            <span class="material-symbols-outlined" style="font-size:1.6em;">home</span>
+            <span class="md-nav-label" style="display:none;">Inicio</span>
+          </a>
+          <a href="/setupwifi" title="Configura tu WiFi" style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:0.3em;font-size:1.1em;">
+            <span class="material-symbols-outlined" style="font-size:1.6em;">wifi</span>
+            <span class="md-nav-label" style="display:none;">Configura tu WiFi</span>
+          </a>
+        </div>
+      </nav>
+      <aside id="drawer" style="position:fixed;top:0;left:0;width:270px;max-width:90vw;height:100vh;background:var(--color-primary-light);box-shadow:2px 0 16px var(--color-shadow);z-index:200;transform:translateX(-100%);transition:transform 0.25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;">
+        <div style="height:56px;display:flex;align-items:center;padding-left:1.2em;">
+          <span style="color:var(--color-primary);font-size:1.2em;font-weight:500;">DogFeeder</span>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--color-border);margin:0 0 0.5em 0;">
+        <a href="/" style="color:var(--color-primary);text-decoration:none;display:flex;align-items:center;gap:0.7em;padding:0.9em 1.5em;font-size:1.1em;">
+          <span class="material-symbols-outlined" style="font-size:1.5em;">home</span>
+          <span>Inicio</span>
+        </a>
+        <a href="/setupwifi" style="color:var(--color-primary);text-decoration:none;display:flex;align-items:center;gap:0.7em;padding:0.9em 1.5em;font-size:1.1em;">
+          <span class="material-symbols-outlined" style="font-size:1.5em;">wifi</span>
+          <span>Configura tu WiFi</span>
+        </a>
+      </aside>
+      <div id="drawer-backdrop" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;z-index:150;"></div>
+    </header>
+    <style>
+      @media (min-width: 700px) {
+        .md-nav-label { display: inline !important; }
+      }
+      @media (max-width: 699px) {
+        .md-nav-label { display: none !important; }
+      }
+      @media (max-width: 699px) {
+        #navbar-title { font-size: 1.1em !important; }
+      }
+      #drawer.open {
+        transform: translateX(0%) !important;
+      }
+      #drawer-backdrop.open {
+        display: block !important;
+      }
+    </style>
+    <script>
+      // Drawer funcional tipo Material Web
+      const drawer = document.getElementById('drawer');
+      const menuBtn = document.getElementById('menu-btn');
+      const drawerBackdrop = document.getElementById('drawer-backdrop');
+      menuBtn.addEventListener('click', () => {
+        drawer.classList.add('open');
+        drawerBackdrop.classList.add('open');
+      });
+      drawerBackdrop.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        drawerBackdrop.classList.remove('open');
+      });
+      // Cerrar con Escape
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          drawer.classList.remove('open');
+          drawerBackdrop.classList.remove('open');
+        }
+      });
+    </script>
+  <div class="container">
+    <h2>Configura tu WiFi</h2>
+    <form id="wifiForm" autocomplete="off" style="margin-top:1.5em;">
+      <md-outlined-text-field label="Nombre de Red (SSID)" id="ssid" name="ssid" required type="text"></md-outlined-text-field>
+      <md-outlined-text-field label="Contraseña" id="password" name="password" required type="password"></md-outlined-text-field>
+      <md-filled-button type="submit" style="width:100%;margin-top:1.2em;">Guardar y Conectar</md-filled-button>
+    </form>
+    <div class="msg" id="msg"></div>
+  </div>
+  <script>
+    // Menú hamburguesa para móvil
+    function toggleMenu() {
+      var navbar = document.querySelector('.navbar');
+      navbar.classList.toggle('open');
+    }
+    // Cerrar menú al hacer click fuera o en un enlace
+    document.addEventListener('click', function(e) {
+      var navbar = document.querySelector('.navbar');
+      if (!navbar.contains(e.target)) {
+        navbar.classList.remove('open');
+      }
+      if (e.target.tagName === 'A') {
+        navbar.classList.remove('open');
+      }
+    });
+    document.getElementById('wifiForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const ssid = document.getElementById('ssid').value;
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+      msg.textContent = 'Enviando credenciales...';
+      try {
+        const res = await fetch('/set_wifi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ssid, password })
+        });
+        if (res.ok) {
+          msg.textContent = '¡Credenciales guardadas! El dispositivo se reiniciará.';
+        } else {
+          msg.textContent = 'Error al guardar credenciales.';
+        }
+      } catch (err) {
+        msg.textContent = 'Error de conexión.';
+      }
+    };
+  </script>
+</body>
+</html>

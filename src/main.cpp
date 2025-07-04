@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <WiFiManager.h> // Librería para portal cautivo
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <uri/UriBraces.h>
@@ -76,10 +77,123 @@ void cargarConfiguracionEEPROM(std::vector<ConfigDiaHorario>& confs) {
   Serial.println();
 }
 
-#define WIFI_SSID ""
-#define WIFI_PASSWORD ""
+// --- Encriptación de credenciales WiFi ---
+#define AES_KEY "1234567890123456" // 16 bytes (clave fija, puedes cambiarla)
+#define WIFI_EEPROM_ADDR 400 // Dirección EEPROM para credenciales WiFi
+
+String wifi_ssid = "";
+String wifi_password = "";
+
+AESLib aesLib;
+
+// --- Encriptar y desencriptar usando AESLib (encrypt64/decrypt64) ---
+byte aes_key[16] = {0};
+byte aes_iv[16] = {0}; // IV fijo para ejemplo, puedes mejorar esto
+
+void prepareKeyAndIV(const String& keyStr) {
+  // Copia la clave al buffer de 16 bytes
+  memset(aes_key, 0, 16);
+  size_t len = keyStr.length();
+  if (len > 16) len = 16;
+  memcpy(aes_key, keyStr.c_str(), len);
+  // IV en cero (puedes cambiarlo si quieres)
+  memset(aes_iv, 0, 16);
+}
+
+String encryptString(const String& text, const String& key) {
+  prepareKeyAndIV(key);
+  char encrypted[256];
+  int msgLen = text.length();
+  const byte* plainBytes = (const byte*)text.c_str();
+  int encLen = aesLib.encrypt64(
+    plainBytes,
+    msgLen,
+    encrypted,
+    aes_key,
+    16, // keyLen
+    aes_iv
+  );
+  encrypted[encLen] = '\0';
+  return String(encrypted);
+}
+
+String decryptString(const String& encrypted, const String& key) {
+  prepareKeyAndIV(key);
+  byte decrypted[256];
+  int encLen = strlen(encrypted.c_str());
+  int decLen = aesLib.decrypt64(
+    (char*)encrypted.c_str(),
+    encLen,
+    decrypted,
+    aes_key,
+    16, // keyLen
+    aes_iv
+  );
+  decrypted[decLen] = '\0';
+  return String((char*)decrypted);
+}
+
+void guardarCredencialesWiFi(const String& ssid, const String& password) {
+  String enc_ssid = encryptString(ssid, AES_KEY);
+  String enc_pass = encryptString(password, AES_KEY);
+  String data = enc_ssid + "," + enc_pass;
+  EEPROM.begin(512);
+  for (size_t i = 0; i < data.length(); ++i) {
+    EEPROM.write(WIFI_EEPROM_ADDR + i, data[i]);
+  }
+  EEPROM.write(WIFI_EEPROM_ADDR + data.length(), '\0');
+  EEPROM.commit();
+  wifi_ssid = ssid;
+  wifi_password = password;
+  Serial.println("Credenciales WiFi guardadas encriptadas en EEPROM.");
+}
+
+void cargarCredencialesWiFi() {
+  EEPROM.begin(512);
+  char data[128];
+  size_t i = 0;
+  bool soloFF = true;
+  for (; i < sizeof(data) - 1; ++i) {
+    data[i] = EEPROM.read(WIFI_EEPROM_ADDR + i);
+    if (data[i] != 0xFF) soloFF = false;
+    if (data[i] == '\0' || data[i] == 0xFF) break;
+  }
+  data[i] = '\0';
+  String str = String(data);
+  int coma = str.indexOf(',');
+  // Si la EEPROM está vacía o solo contiene 0xFF, usar por defecto
+  if (soloFF || coma <= 0 || coma >= (int)str.length() - 1) {
+    wifi_ssid = "IoT";
+    wifi_password = "24_RunJapan2024.1";
+    Serial.println("No hay credenciales WiFi guardadas, usando por defecto.");
+    return;
+  }
+  String enc_ssid = str.substring(0, coma);
+  String enc_pass = str.substring(coma + 1);
+  wifi_ssid = decryptString(enc_ssid, AES_KEY);
+  wifi_password = decryptString(enc_pass, AES_KEY);
+  // Validar que el resultado sea imprimible y no vacío
+  bool ssidValido = wifi_ssid.length() > 0 && wifi_ssid.length() < 33;
+  bool passValido = wifi_password.length() > 0 && wifi_password.length() < 65;
+  for (size_t j = 0; j < wifi_ssid.length(); ++j) {
+    if (wifi_ssid[j] < 32 || wifi_ssid[j] > 126) ssidValido = false;
+  }
+  for (size_t j = 0; j < wifi_password.length(); ++j) {
+    if (wifi_password[j] < 32 || wifi_password[j] > 126) passValido = false;
+  }
+  if (!ssidValido || !passValido) {
+    wifi_ssid = "IoT";
+    wifi_password = "24_RunJapan2024.1";
+    Serial.println("Credenciales WiFi corruptas, usando por defecto.");
+    return;
+  }
+  Serial.println("Credenciales WiFi desencriptadas:");
+  Serial.println("SSID: " + wifi_ssid);
+  Serial.println("PASS: " + wifi_password);
+}
 // Defining the WiFi channel speeds up the connection:
 #define WIFI_CHANNEL 6
+
 
 WebServer server(80);
 
@@ -109,21 +223,21 @@ void sendHtml() {
   server.send(200, "text/html", response);
 }
 
-void setup(void) {
-  
-  myStepper.setSpeed(10);
 
-  server.on("/alimentar", HTTP_POST, []() {
-    Serial.println("Alimentación manual activada: LED2 encendido");
-    // Apagar después de 5 segundos (no bloqueante)
-    alimentarMotor();
-    static unsigned long alimentarAhoraMillis = 0;
-    alimentarAhoraMillis = millis();
-    server.send(200, "text/plain", "¡Alimentación manual activada!");
-    // Guardar el tiempo para apagar en loop
-    extern unsigned long alimentarAhoraMillisGlobal;
-    alimentarAhoraMillisGlobal = alimentarAhoraMillis;
+
+void setup(void) {
+  // Endpoint para mostrar el portal de configuración WiFi (sirve wifimanager.html)
+  server.on("/setupwifi", HTTP_GET, []() {
+    File f = SPIFFS.open("/wifimanager.html", "r");
+    if (!f) {
+      server.send(500, "text/plain", "No se encontró wifimanager.html en SPIFFS");
+      return;
+    }
+    String html = f.readString();
+    f.close();
+    server.send(200, "text/html", html);
   });
+  myStepper.setSpeed(10);
   Serial.begin(115200);
   Serial.println();
   Serial.println("Iniciando setup...");
@@ -138,31 +252,100 @@ void setup(void) {
   cargarConfiguracionEEPROM(configuraciones);
   Serial.println("Configuraciones después de cargar: " + String(configuraciones.size()));
 
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD, WIFI_CHANNEL);
-  Serial.print("Connecting to WiFi ");
-  Serial.print(WIFI_SSID);
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
-    Serial.print(".");
+  // --- Lógica para decidir si lanzar WiFiManager ---
+  cargarCredencialesWiFi();
+  bool sinCredenciales = wifi_ssid.length() == 0 || wifi_password.length() == 0;
+  bool forzarPortal = false;
+  if (server.arg("setupwifi") == "1") {
+    forzarPortal = true;
   }
-  Serial.println(" Connected!");
 
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  // Inicializar NTP
-  timeClient.begin();
-  if (timeClient.forceUpdate()) {
-    Serial.print("Hora actual: ");
-    Serial.println(timeClient.getFormattedTime());
+  if (sinCredenciales || forzarPortal) {
+    WiFiManager wifiManager;
+    wifiManager.setAPCallback([](WiFiManager* wm) {
+      Serial.println("Portal WiFiManager activo. Conéctate a la red y abre 192.168.4.1");
+    });
+    wifiManager.setConfigPortalTimeout(180); // 3 minutos
+    wifiManager.setCustomHeadElement("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
+    // wifiManager.setMenu({"wifi","info","exit"}); // No compatible en todas las versiones
+    if (!wifiManager.autoConnect("DogFeeder-Setup")) {
+      Serial.println("No se pudo conectar y no se proporcionaron credenciales.");
+      ESP.restart();
+      delay(1000);
+    }
+    Serial.println("¡Conectado a WiFi!");
+    Serial.println(WiFi.localIP());
+    // Guardar credenciales encriptadas si se usó el portal
+    guardarCredencialesWiFi(WiFi.SSID(), WiFi.psk());
   } else {
-    Serial.println("No se pudo obtener la hora NTP");
+    WiFi.begin(wifi_ssid.c_str(), wifi_password.c_str(), WIFI_CHANNEL);
+    Serial.print("Connecting to WiFi ");
+    Serial.print(wifi_ssid);
+    int intentos = 0;
+    while (WiFi.status() != WL_CONNECTED && intentos < 100) {
+      delay(100);
+      Serial.print(".");
+      intentos++;
+    }
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println(" Connected!");
+      Serial.print("IP address: ");
+      Serial.println(WiFi.localIP());
+    } else {
+      Serial.println("\nNo se pudo conectar a la red guardada. Lanzando portal WiFiManager.");
+      WiFiManager wifiManager;
+      wifiManager.setAPCallback([](WiFiManager* wm) {
+        Serial.println("Portal WiFiManager activo. Conéctate a la red y abre 192.168.4.1");
+      });
+      wifiManager.setConfigPortalTimeout(180);
+      wifiManager.setCustomHeadElement("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
+      // wifiManager.setMenu({"wifi","info","exit"}); // No compatible en todas las versiones
+      if (!wifiManager.autoConnect("DogFeeder-Setup")) {
+        Serial.println("No se pudo conectar y no se proporcionaron credenciales.");
+        ESP.restart();
+        delay(1000);
+      }
+      Serial.println("¡Conectado a WiFi!");
+      Serial.println(WiFi.localIP());
+      guardarCredencialesWiFi(WiFi.SSID(), WiFi.psk());
+    }
   }
 
-  server.on("/", sendHtml);
+  // Inicializar NTP solo si hay WiFi
+  if (WiFi.status() == WL_CONNECTED) {
+    timeClient.begin();
+    if (timeClient.forceUpdate()) {
+      Serial.print("Hora actual: ");
+      Serial.println(timeClient.getFormattedTime());
+    } else {
+      Serial.println("No se pudo obtener la hora NTP");
+    }
+  } else {
+    Serial.println("No se inicializa NTPClient porque no hay WiFi");
+  }
 
-  // Ruta para obtener la configuración guardada en formato JSON (array de objetos)
+  // --- Servidor web para funciones del alimentador ---
+  server.on("/", HTTP_GET, []() {
+    File f = SPIFFS.open("/webpage.html", "r");
+    if (!f) {
+      server.send(500, "text/plain", "No se encontró webpage.html en SPIFFS");
+      return;
+    }
+    String html = f.readString();
+    f.close();
+    server.send(200, "text/html", html);
+  });
+
+  server.on("/alimentar", HTTP_POST, []() {
+    Serial.println("Alimentación manual activada: LED2 encendido");
+    alimentarMotor();
+    static unsigned long alimentarAhoraMillis = 0;
+    alimentarAhoraMillis = millis();
+    server.send(200, "text/plain", "¡Alimentación manual activada!");
+    extern unsigned long alimentarAhoraMillisGlobal;
+    alimentarAhoraMillisGlobal = alimentarAhoraMillis;
+  });
+
   server.on("/configuracion", HTTP_GET, []() {
     String json = "[";
     for (size_t i = 0; i < configuraciones.size(); ++i) {
@@ -173,13 +356,10 @@ void setup(void) {
     server.send(200, "application/json", json);
   });
 
-  // Ruta para recibir la configuración del alimentador (array de objetos o formato antiguo)
   server.on("/configurar", HTTP_POST, []() {
     String body = server.arg("plain");
     Serial.println("\nConfiguración recibida:");
     Serial.println(body);
-    // Si el body es un array de objetos [{"dia":"L","horario":"08:00"}, ...] (eliminar)
-    // Nuevo formato: {"dia":"L","horarios":["08:00","12:00"]}
     if (body.startsWith("{")) {
       int d1 = body.indexOf("\"dia\"");
       int h1 = body.indexOf("\"horarios\"");
@@ -199,12 +379,10 @@ void setup(void) {
             horarios.push_back(horariosStr.substring(idx+1, end));
             last = end+1;
           }
-          // Eliminar todas las configuraciones previas de ese día
           for (auto it = configuraciones.begin(); it != configuraciones.end(); ) {
             if (it->dia == dia) it = configuraciones.erase(it);
             else ++it;
           }
-          // Agregar los nuevos horarios para ese día
           for (size_t j = 0; j < horarios.size(); ++j) {
             if (configuraciones.size() < 21)
               configuraciones.push_back({dia, horarios[j]});
@@ -212,7 +390,6 @@ void setup(void) {
         }
       }
     } else if (body.startsWith("[")) {
-      // Compatibilidad: array de objetos
       configuraciones.clear();
       int pos = 0;
       while (true) {
@@ -244,6 +421,28 @@ void setup(void) {
     server.send(200, "text/plain", "¡Configuración guardada en memoria!");
   });
 
+  // --- Endpoint para establecer credenciales WiFi (útil si quieres cambiar la red desde la web) ---
+  server.on("/set_wifi", HTTP_POST, []() {
+    String body = server.arg("plain");
+    int s1 = body.indexOf("\"ssid\"");
+    int p1 = body.indexOf("\"password\"");
+    if (s1 != -1 && p1 != -1) {
+      int sval1 = body.indexOf('"', s1+6);
+      int sval2 = body.indexOf('"', sval1+1);
+      int pval1 = body.indexOf('"', p1+10);
+      int pval2 = body.indexOf('"', pval1+1);
+      if (sval1 != -1 && sval2 != -1 && pval1 != -1 && pval2 != -1) {
+        String ssid = body.substring(sval1+1, sval2);
+        String pass = body.substring(pval1+1, pval2);
+        guardarCredencialesWiFi(ssid, pass);
+        server.send(200, "text/plain", "¡Credenciales WiFi guardadas!");
+        ESP.restart();
+        return;
+      }
+    }
+    server.send(400, "text/plain", "Formato inválido. Esperado: {\"ssid\":\"...\",\"password\":\"...\"}");
+  });
+
   server.begin();
   Serial.println("HTTP server started");
 }
@@ -256,7 +455,10 @@ bool alimentandoAhora = false;
 
 void loop(void) {
   server.handleClient();
-  timeClient.update(); // Mantener la hora actualizada
+  // Solo actualizar NTP si hay WiFi
+  if (WiFi.status() == WL_CONNECTED) {
+    timeClient.update(); // Mantener la hora actualizada
+  }
 
   // Verificar solo una vez por minuto
   static int ultimoMinutoVerificado = -1;

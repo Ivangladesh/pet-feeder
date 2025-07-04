@@ -20,28 +20,119 @@
       document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
     </script>
     <style>
-html, body {
-  font-family: 'Product Sans', 'Product Sans Thin', 'Product Sans Light', 'Product Sans Medium', 'Product Sans Black', 'Roboto', Arial, sans-serif;
-        background: var(--md-sys-color-surface, #f7f7f7);
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        text-align: center;
+    :root {
+      --color-primary: #2456e6;
+      --color-primary-dark: #1a3fa0;
+      --color-primary-light: #eaf0fe;
+      --color-accent: #a259e6;
+      --color-bg: #f5f7fd;
+      --color-surface: #fafdff;
+      --color-border: #e0e6f7;
+      --color-text: #1a2340;
+      --color-text-light: #b3c0ff;
+      --color-success: #388e3c;
+      --color-outline: #2456e6;
+      --color-shadow: #2456e622;
+    }
+    /* Responsive navigation bar: íconos en móvil, íconos+texto en escritorio */
+    .md-nav-label {
+      display: none;
+    }
+    @media (min-width: 700px) {
+      .md-nav-label {
+        display: inline;
+        margin-left: 0.5em;
+        font-weight: 500;
+        font-size: 1.08em;
       }
-      .container {
-        margin: 2em auto;
-        width: 75vw;
-        background: var(--md-sys-color-surface-container-high, #fff);
-        border-radius: 18px;
-        box-shadow: 0 2px 12px #0002;
-        padding: 2em 1.2em 2em 1.2em;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-      }
-      md-filled-button {
-        margin: 0.4em 0.2em;
-      }
+    }
+    /* Animaciones Material Design para el navbar y botones */
+    .navbar nav a {
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s, color 0.2s;
+    }
+    .navbar nav a::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.25);
+      border-radius: 100%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s cubic-bezier(.4,0,.2,1), height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .navbar nav a:active::after {
+      width: 200%;
+      height: 500%;
+      opacity: 1;
+      transition: 0s;
+    }
+    md-filled-button, md-outlined-text-field {
+      transition: box-shadow 0.2s cubic-bezier(.4,0,.2,1), background 0.2s cubic-bezier(.4,0,.2,1);
+    }
+    md-filled-button:active {
+      box-shadow: 0 2px 8px #1976d2aa;
+      background: var(--md-sys-color-primary, #1565c0);
+    }
+    .container, .navbar {
+      transition: box-shadow 0.3s cubic-bezier(.4,0,.2,1), background 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    .container:active {
+      box-shadow: 0 4px 24px #1976d233;
+    }
+    html, body {
+      font-family: 'Product Sans', 'Product Sans Thin', 'Product Sans Light', 'Product Sans Medium', 'Product Sans Black', 'Roboto', Arial, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .container {
+      margin: 2em auto;
+      width: 75vw;
+      background: var(--color-surface);
+      border-radius: 18px;
+      box-shadow: 0 2px 12px var(--color-shadow);
+      padding: 2em 1.2em 2em 1.2em;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    md-filled-button {
+      margin: 0.4em 0.2em;
+      --md-filled-button-container-color: var(--color-primary);
+      --md-filled-button-label-text-color: #fff;
+      --md-filled-button-hover-label-text-color: #fff;
+      --md-filled-button-hover-container-color: var(--color-primary-dark);
+      --md-filled-button-focus-container-color: var(--color-primary-dark);
+      --md-filled-button-disabled-container-color: #e0e6f7;
+      --md-filled-button-disabled-label-text-color: #b3c0ff;
+      font-weight: 500;
+      border-radius: 1.7em;
+      box-shadow: 0 2px 8px var(--color-shadow);
+    }
+    md-filled-button:active {
+      background: var(--color-primary-dark);
+    }
+    md-outlined-text-field {
+      margin-bottom: 1.2em;
+      width: 100%;
+      --md-outlined-field-outline-color: var(--color-outline);
+      --md-outlined-field-label-text-color: var(--color-primary);
+      --md-outlined-field-input-text-color: var(--color-text);
+      --md-outlined-field-focus-outline-color: var(--color-primary);
+      --md-outlined-field-hover-outline-color: var(--color-primary-dark);
+      --md-outlined-field-container-color: var(--color-surface);
+      --md-outlined-field-disabled-outline-color: #e0e6f7;
+    }
       #fecha-hora {
         margin-bottom: 1em;
         font-size: 1.1em;
@@ -97,6 +188,80 @@ html, body {
     </style>
   </head>
   <body>
+    <!-- NAVIGATION BAR INSPIRADA EN MATERIAL WEB DEMO -->
+    <header style="position:sticky;top:0;z-index:100;">
+      <nav id="main-navbar" style="display:flex;align-items:center;justify-content:space-between;background:var(--color-primary);padding:0 1.2em;height:56px;box-shadow:0 2px 8px var(--color-shadow);">
+        <div style="display:flex;align-items:center;gap:0.7em;">
+          <button id="menu-btn" aria-label="Menú" style="background:none;border:none;outline:none;cursor:pointer;padding:0;margin-right:0.5em;display:flex;align-items:center;">
+            <span class="material-symbols-outlined" style="font-size:2em;color:#fff;">menu</span>
+          </button>
+          <span id="navbar-title" style="color:#fff;font-size:1.3em;font-weight:500;letter-spacing:0.01em;">DogFeeder</span>
+        </div>
+        <div id="navbar-actions" style="display:flex;align-items:center;gap:0.5em;">
+          <a href="/" title="Inicio" style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:0.3em;font-size:1.1em;">
+            <span class="material-symbols-outlined" style="font-size:1.6em;">home</span>
+            <span class="md-nav-label" style="display:none;">Inicio</span>
+          </a>
+          <a href="/setupwifi" title="Configura tu WiFi" style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:0.3em;font-size:1.1em;">
+            <span class="material-symbols-outlined" style="font-size:1.6em;">wifi</span>
+            <span class="md-nav-label" style="display:none;">Configura tu WiFi</span>
+          </a>
+        </div>
+      </nav>
+      <aside id="drawer" style="position:fixed;top:0;left:0;width:270px;max-width:90vw;height:100vh;background:var(--color-primary-light);box-shadow:2px 0 16px var(--color-shadow);z-index:200;transform:translateX(-100%);transition:transform 0.25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;">
+        <div style="height:56px;display:flex;align-items:center;padding-left:1.2em;">
+          <span style="color:var(--color-primary);font-size:1.2em;font-weight:500;">DogFeeder</span>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--color-border);margin:0 0 0.5em 0;">
+        <a href="/" style="color:var(--color-primary);text-decoration:none;display:flex;align-items:center;gap:0.7em;padding:0.9em 1.5em;font-size:1.1em;">
+          <span class="material-symbols-outlined" style="font-size:1.5em;">home</span>
+          <span>Inicio</span>
+        </a>
+        <a href="/setupwifi" style="color:var(--color-primary);text-decoration:none;display:flex;align-items:center;gap:0.7em;padding:0.9em 1.5em;font-size:1.1em;">
+          <span class="material-symbols-outlined" style="font-size:1.5em;">wifi</span>
+          <span>Configura tu WiFi</span>
+        </a>
+      </aside>
+      <div id="drawer-backdrop" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;z-index:150;"></div>
+    </header>
+    <style>
+      @media (min-width: 700px) {
+        .md-nav-label { display: inline !important; }
+      }
+      @media (max-width: 699px) {
+        .md-nav-label { display: none !important; }
+      }
+      @media (max-width: 699px) {
+        #navbar-title { font-size: 1.1em !important; }
+      }
+      #drawer.open {
+        transform: translateX(0%) !important;
+      }
+      #drawer-backdrop.open {
+        display: block !important;
+      }
+    </style>
+    <script>
+      // Drawer funcional tipo Material Web
+      const drawer = document.getElementById('drawer');
+      const menuBtn = document.getElementById('menu-btn');
+      const drawerBackdrop = document.getElementById('drawer-backdrop');
+      menuBtn.addEventListener('click', () => {
+        drawer.classList.add('open');
+        drawerBackdrop.classList.add('open');
+      });
+      drawerBackdrop.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        drawerBackdrop.classList.remove('open');
+      });
+      // Cerrar con Escape
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          drawer.classList.remove('open');
+          drawerBackdrop.classList.remove('open');
+        }
+      });
+    </script>
     <div class="content-container">
     <div class="container description">
         <h1 >Alimentador Automático para Perros</h1>
@@ -148,7 +313,7 @@ html, body {
       mostrarSpinner(true);
       fetch('/alimentar', { method: 'POST' })
         .then(res => res.ok ? res.text() : Promise.reject('Error al alimentar'))
-        .then(msg => mostrarMensaje(msg || '¡Alimentación manual activada!'))
+        .then(msg => mostrarMensaje(msg || '¡Alimentación manual completada!'))
         .catch(() => mostrarMensaje('Error al activar alimentación.', 'error'))
         .finally(() => {
           btn.textContent = textoOriginal;
@@ -361,14 +526,16 @@ function eliminarHorario(btn) {
 function cargarHorariosParaDia(dia) {
   const horariosDiv = document.getElementById('horarios');
   horariosDiv.innerHTML = '';
-  // Buscar la configuración para el día seleccionado
-  const confDia = configuracionesGuardadas.find(conf => conf.dia === dia);
+  // Buscar todas las configuraciones para el día seleccionado
+  const confsDia = configuracionesGuardadas.filter(conf => conf.dia === dia);
   let horariosParaDia = [];
-  if (confDia && Array.isArray(confDia.horario)) {
-    horariosParaDia = confDia.horario;
-  } else if (confDia && typeof confDia.horario === 'string') {
-    horariosParaDia = [confDia.horario];
-  }
+  confsDia.forEach(conf => {
+    if (Array.isArray(conf.horario)) {
+      horariosParaDia = horariosParaDia.concat(conf.horario);
+    } else if (typeof conf.horario === 'string') {
+      horariosParaDia.push(conf.horario);
+    }
+  });
   if (horariosParaDia.length) {
     horariosParaDia.forEach(horario => agregarHorario(horario));
   } else {
@@ -422,15 +589,16 @@ function cargarHorariosParaDia(dia) {
 
 document.getElementById('formAlimentador').onsubmit = function(e) {
   e.preventDefault();
-  const radioGroup = document.getElementById('diasRadioGroup');
-  const dia = radioGroup ? radioGroup.value : '';
+  // Obtener el día seleccionado correctamente del radio button marcado
+  let dia = '';
+  const radios = document.querySelectorAll('#diasRadioGroup md-radio');
+  radios.forEach(radio => {
+    if (radio.checked) dia = radio.value;
+  });
   // Tomar todos los horarios, asegurando formato HH:MM
   const horarios = Array.from(document.querySelectorAll('md-list-item md-outlined-text-field[name="horario[]"]')).map(input => {
     let v = input.value || '';
-    // Si es input type="time", ya está en formato HH:MM
-    // Si es custom picker, también se guarda como HH:MM
     if (/^\d{2}:\d{2}$/.test(v)) return v;
-    // Si no, intentar formatear
     if (v.length === 5 && v[2] === ':') return v;
     return '';
   }).filter(v => v);
@@ -438,7 +606,10 @@ document.getElementById('formAlimentador').onsubmit = function(e) {
     mostrarMensaje('Selecciona un día.', 'error');
     return;
   }
-
+  if (!horarios.length) {
+    mostrarMensaje('Agrega al menos un horario.', 'error');
+    return;
+  }
   const btnGuardar = document.getElementById('btnGuardarConfig');
   const textoOriginal = btnGuardar.textContent;
   btnGuardar.textContent = 'Guardando configuración';
@@ -451,7 +622,6 @@ document.getElementById('formAlimentador').onsubmit = function(e) {
   .then(res => res.ok ? res.text() : Promise.reject('Error al guardar'))
   .then(msg => {
     mostrarMensaje(msg || '¡Configuración guardada!');
-    // Actualizar la lista local y recargar horarios
     obtenerConfiguraciones();
   })
   .catch(() => mostrarMensaje('Error al enviar la configuración.', 'error'))
