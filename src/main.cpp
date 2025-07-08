@@ -227,27 +227,35 @@ void sendHtml() {
 
 void setup(void) {
 
-    // Servir archivos CSS desde SPIFFS
+  // Servir archivos CSS desde SPIFFS en ambas rutas: /archivo.css y /data/archivo.css
   // server.serveStatic("/light.css", SPIFFS, "/light.css");
   // server.serveStatic("/light-mc.css", SPIFFS, "/light-mc.css");
   // server.serveStatic("/light-hc.css", SPIFFS, "/light-hc.css");
   // server.serveStatic("/dark.css", SPIFFS, "/dark.css");
   // server.serveStatic("/dark-mc.css", SPIFFS, "/dark-mc.css");
   // server.serveStatic("/dark-hc.css", SPIFFS, "/dark-hc.css");
+  // También servir bajo /data/ para compatibilidad con las rutas del HTML
+  server.serveStatic("/data/light.css", SPIFFS, "/light.css");
+  server.serveStatic("/data/light-mc.css", SPIFFS, "/light-mc.css");
+  server.serveStatic("/data/light-hc.css", SPIFFS, "/light-hc.css");
+  server.serveStatic("/data/dark.css", SPIFFS, "/dark.css");
+  server.serveStatic("/data/dark-mc.css", SPIFFS, "/dark-mc.css");
+  server.serveStatic("/data/dark-hc.css", SPIFFS, "/dark-hc.css");
+  server.serveStatic("/data/webpage-material.css", SPIFFS, "/webpage-material.css");
   // // Route to load style.css file
   // server.on("/style.css", HTTP_GET, [](){
   //   server.send(200, "/style.css", "text/css");
   // });
-  server.on("/light,css", HTTP_GET, []() {
-    File f = SPIFFS.open("/light,css", "r");
-    if (!f) {
-      server.send(500, "text/css", "No se encontró wifimanager.html en SPIFFS");
-      return;
-    }
-    String css = f.readString();
-    f.close();
-    server.send(200, "/style.css", "text/css");
-  });
+  // server.on("/light,css", HTTP_GET, []() {
+  //   File f = SPIFFS.open("/light,css", "r");
+  //   if (!f) {
+  //     server.send(500, "text/css", "No se encontró wifimanager.html en SPIFFS");
+  //     return;
+  //   }
+  //   String css = f.readString();
+  //   f.close();
+  //   server.send(200, "/style.css", "text/css");
+  // });
 
   // Endpoint para mostrar el portal de configuración WiFi (sirve wifimanager.html)
   server.on("/setupwifi", HTTP_GET, []() {

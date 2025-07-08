@@ -7,7 +7,7 @@
     <link href="https://fonts.cdnfonts.com/css/google-sans" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-        <link rel="stylesheet" href="/data/light.css">
+    <link rel="stylesheet" href="/data/light.css">
     <link rel="stylesheet" href="/data/light-mc.css">
     <link rel="stylesheet" href="/data/light-hc.css">
     <link rel="stylesheet" href="/data/dark.css">
@@ -25,247 +25,31 @@
       import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
       document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
     </script>
-    <style>
-    /* Responsive navigation bar: íconos en móvil, íconos+texto en escritorio */
-    .md-nav-label {
-      display: none;
-    }
-    @media (min-width: 700px) {
-      .md-nav-label {
-        display: inline;
-        margin-left: 0.5em;
-        font-weight: 500;
-        font-size: 1.08em;
-      }
-    }
-    /* Animaciones Material Design para el navbar y botones */
-    .navbar nav a {
-      position: relative;
-      overflow: hidden;
-      transition: background 0.2s, color 0.2s;
-    }
-    .navbar nav a::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255,255,255,0.25);
-      border-radius: 100%;
-      transform: translate(-50%, -50%);
-      transition: width 0.4s cubic-bezier(.4,0,.2,1), height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .navbar nav a:active::after {
-      width: 200%;
-      height: 500%;
-      opacity: 1;
-      transition: 0s;
-    }
-    md-filled-button, md-outlined-text-field {
-      transition: box-shadow 0.2s cubic-bezier(.4,0,.2,1), background 0.2s cubic-bezier(.4,0,.2,1);
-    }
-    md-filled-button:active {
-      box-shadow: 0 2px 8px #1976d2aa;
-      background: var(--md-sys-color-primary, #1565c0);
-    }
-    .container, .navbar {
-      transition: box-shadow 0.3s cubic-bezier(.4,0,.2,1), background 0.3s cubic-bezier(.4,0,.2,1);
-    }
-    .container:active {
-      box-shadow: 0 4px 24px #1976d233;
-    }
-    html, body {
-      font-family: 'Product Sans', 'Product Sans Thin', 'Product Sans Light', 'Product Sans Medium', 'Product Sans Black', 'Roboto', Arial, sans-serif;
-      background: var(--md-sys-color-background);
-      color: var(--md-sys-color-on-background);
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      text-align: center;
-    }
-    .container {
-      margin: 2em auto;
-      width: 75vw;
-      background: var(--md-sys-color-surface);
-      border-radius: 18px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.13);
-      padding: 2em 1.2em 2em 1.2em;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    /* Adaptar md-list y md-list-item a los temas */
-    md-list.horarios {
-      background: var(--md-sys-color-surface);
-      border-radius: 12px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.13);
-      padding: 0.2em 0.1em;
-      margin-bottom: 1.2em;
-      border: 1.5px solid var(--md-sys-color-surface-variant);
-      transition: background 0.3s, box-shadow 0.3s, border 0.3s;
-    }
-    md-list.horarios md-list-item {
-      background: transparent;
-      color: var(--md-sys-color-on-surface);
-      border-bottom: 1px solid var(--md-sys-color-surface-variant);
-      transition: background 0.3s, color 0.3s;
-    }
-    md-list.horarios md-list-item:last-child {
-      border-bottom: none;
-    }
-    md-list.horarios md-outlined-text-field,
-    md-list.horarios md-icon-button {
-      background: transparent;
-      color: var(--md-sys-color-on-surface);
-    }
-    md-list.horarios md-outlined-text-field[readonly] {
-      background: transparent;
-      color: var(--md-sys-color-on-surface);
-    }
-    md-list.horarios md-icon-button span.material-symbols-outlined {
-      color: var(--md-sys-color-inverse-primary);
-      transition: color 0.3s;
-    }
-    @media (max-width: 700px) {
-      md-list.horarios {
-        border-radius: 8px;
-        padding: 0.1em 0;
-      }
-    }
-    md-filled-button {
-      margin: 0.4em 0.2em;
-      --md-filled-button-container-color: var(--md-sys-color-primary);
-      --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
-      --md-filled-button-hover-label-text-color: var(--md-sys-color-on-primary);
-      --md-filled-button-hover-container-color: var(--md-sys-color-primary-container);
-      --md-filled-button-focus-container-color: var(--md-sys-color-primary-container);
-      --md-filled-button-disabled-container-color: var(--md-sys-color-surface-variant);
-      --md-filled-button-disabled-label-text-color: var(--md-sys-color-inverse-primary);
-      font-weight: 500;
-      border-radius: 1.7em;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-    }
-    md-filled-button:active {
-      background: var(--md-sys-color-primary-container);
-    }
-    md-outlined-text-field {
-      margin-bottom: 1.2em;
-      width: 100%;
-      --md-outlined-field-outline-color: var(--md-sys-color-outline);
-      --md-outlined-field-label-text-color: var(--md-sys-color-primary);
-      --md-outlined-field-input-text-color: var(--md-sys-color-on-surface);
-      --md-outlined-field-focus-outline-color: var(--md-sys-color-primary);
-      --md-outlined-field-hover-outline-color: var(--md-sys-color-primary-container);
-      --md-outlined-field-container-color: var(--md-sys-color-surface);
-      --md-outlined-field-disabled-outline-color: var(--md-sys-color-surface-variant);
-    }
-    /* Eliminar el contador de caracteres de los campos de hora/minuto de los md-outlined-text-field */
-    md-outlined-text-field::part(char-counter),
-    md-outlined-text-field .md-char-counter,
-    md-outlined-text-field .mdc-text-field-character-counter,
-    .md-char-counter, .mdc-text-field-character-counter, .char-counter, .field-length-counter,
-    .time-field-counter, .minute-field-counter {
-      display: none !important;
-      visibility: hidden !important;
-      height: 0 !important;
-      width: 0 !important;
-      font-size: 0 !important;
-      pointer-events: none !important;
-    }
-    /* Estilos para eliminar el contador de caracteres de los campos de hora/minuto */
-    .md-char-counter, .mdc-text-field-character-counter, .char-counter, .field-length-counter {
-      display: none !important;
-      visibility: hidden !important;
-      height: 0 !important;
-      width: 0 !important;
-      font-size: 0 !important;
-      pointer-events: none !important;
-    }
-    /* Quitar el contador de caracteres de los campos de hora/minuto si se usan componentes personalizados */
-    .time-field-counter, .minute-field-counter {
-      display: none !important;
-    }
-      #fecha-hora {
-        margin-bottom: 1em;
-        font-size: 1.1em;
-        color: #555;
-      }
-      .dias {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.5em;
-        margin-bottom: 1.5em;
-      }
-      .horarios {
-        margin-bottom: 1.5em;
-      }
-            .dias-semana-col {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.5em 1.2em;
-        justify-content: center;
-        width: 100%;
-      }
-      .dia-radio-label {
-        display: flex;
-        align-items: center;
-        gap: 0.3em;
-        margin-bottom: 0.2em;
-      }
-      @media (max-width: 700px) {
-        #diasRadioGroup {
-          flex-direction: column !important;
-          align-items: stretch !important;
-        }
-        .dias-semana-col {
-          flex-direction: column !important;
-          gap: 0.2em !important;
-          align-items: flex-start !important;
-        }
-        .dia-radio-label {
-          flex-direction: row !important;
-          align-items: center !important;
-          gap: 0.5em !important;
-          width: 100%;
-        }
-        #diasRadioGroup label {
-          margin-bottom: 0.2em;
-        }
-      }
-      #mensaje {
-        font-family: 'Roboto', Arial, sans-serif;
-      }
-    </style>
+    <link rel="stylesheet" href="/data/webpage-material.css">
   </head>
   <body>
+    <div class="root light">
     <!-- NAVIGATION BAR INSPIRADA EN MATERIAL WEB DEMO -->
-    <header class="light" style="position:sticky;top:0;z-index:100;">
-      <nav id="main-navbar" style="display:flex;align-items:center;justify-content:space-between;background:var(--md-sys-color-surface-container-high);padding:0 1.2em;height:56px;">
-        <div style="display:flex;align-items:center;gap:0.7em;">
-          <button id="menu-btn" aria-label="Menú" style="background:none;border:none;outline:none;cursor:pointer;padding:0;margin-right:0.5em;display:flex;align-items:center;">
-            <span class="material-symbols-outlined" style="font-size:2em;color:var(--md-sys-color-on-surface);">menu</span>
+    <header class="light header-sticky">
+      <nav id="main-navbar" class="main-navbar-flex">
+        <div class="navbar-title-row">
+          <button id="menu-btn" aria-label="Menú" class="menu-btn">
+            <span class="material-symbols-outlined menu-icon">menu</span>
           </button>
-          <span id="navbar-title" style="color:var(--md-sys-color-on-surface);font-size:1.3em;font-weight:500;letter-spacing:0.01em;">DogFeeder</span>
+          <span id="navbar-title" class="navbar-title">DogFeeder</span>
         </div>
-        <div id="navbar-actions" style="display:flex;align-items:center;gap:0.5em;">
-          <a href="/" title="Inicio" style="color:var(--md-sys-color-on-surface);text-decoration:none;display:flex;align-items:center;gap:0.3em;font-size:1.1em;">
-            <span class="material-symbols-outlined" style="font-size:1.6em;">home</span>
-            <span class="md-nav-label" style="display:none;">Inicio</span>
+        <div id="navbar-actions" class="navbar-actions">
+          <a href="/" title="Inicio" class="navbar-link">
+            <span class="material-symbols-outlined navbar-link-icon">home</span>
+            <span class="md-nav-label">Inicio</span>
           </a>
-          <a href="/setupwifi" title="Configura tu WiFi" style="color:var(--md-sys-color-on-surface);text-decoration:none;display:flex;align-items:center;gap:0.3em;font-size:1.1em;">
-            <span class="material-symbols-outlined" style="font-size:1.6em;">wifi</span>
-            <span class="md-nav-label" style="display:none;">Configura tu WiFi</span>
+          <a href="/setupwifi" title="Configura tu WiFi" class="navbar-link">
+            <span class="material-symbols-outlined navbar-link-icon">wifi</span>
+            <span class="md-nav-label">Configura tu WiFi</span>
           </a>
         </div>
       </nav>
-      <aside id="drawer" class="light" style="position:fixed;top:56px;left:0;width:270px;max-width:90vw;height:calc(100vh - 56px);z-index:200;transform:translateX(-100%);transition:transform 0.25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-radius:0 1.5em 1.5em 0;overflow:hidden;">
+      <aside id="drawer" class="light drawer-fixed">
         <a href="/" class="drawer-link">
           <span class="material-symbols-outlined">home</span>
           <span>Inicio</span>
@@ -274,7 +58,7 @@
           <span class="material-symbols-outlined">wifi</span>
           <span>Configura tu WiFi</span>
         </a>
-        <div style="flex:1 1 auto;"></div>
+        <div class="drawer-flex-spacer"></div>
         <!-- Theme toggle button group -->
         <div id="theme-toggle-group">
           <div id="theme-toggle">
@@ -284,138 +68,6 @@
           </div>
         </div>
       </aside>
-    <style>
-      /* Theme toggle group styles */
-      #theme-toggle-group {
-        user-select: none;
-        padding: 1.2em 1.2em 1.5em 1.2em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      #theme-toggle {
-        display: flex;
-        border-radius: 2em;
-        border: 1.5px solid var(--md-sys-color-outline);
-        overflow: hidden;
-        background: var(--md-sys-color-surface-container-high);
-        box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
-        /* min-width: 220px; */
-      }
-      #theme-toggle button {
-        flex: 1 1 0;
-        border: none;
-        outline: none;
-        background: none;
-        color: var(--md-sys-color-on-surface);
-        font-size: 1.5em;
-        padding: 0.5em 0.5em;
-        min-width: 0;
-        min-height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background 0.18s, color 0.18s;
-        border-radius: 0;
-        position: relative;
-        box-sizing: border-box;
-      }
-      #theme-toggle button.selected {
-        background: var(--md-sys-color-primary-container);
-        color: var(--md-sys-color-primary);
-      }
-      #theme-toggle button.selected::after {
-        content: '';
-      }
-      /* Iconos centrados y sin check encimado */
-      #theme-toggle button .material-symbols-outlined {
-        margin: 0 auto;
-        font-size: 1.25em;
-        z-index: 1;
-      }
-      /* Ajuste para que el botón seleccionado no muestre el check, solo el fondo y color */
-      /* Si quieres un check, agrégalo como un span aparte, no con ::after */
-      #theme-toggle button:focus {
-        outline: 2px solid var(--md-sys-color-primary);
-        z-index: 2;
-      }
-      #theme-toggle button:not(:last-child) {
-        border-right: 1.5px solid var(--md-sys-color-outline);
-      }
-      #theme-toggle button:hover:not(.selected) {
-        background: var(--md-sys-color-surface-variant);
-      }
-
-      /* Ajustes para la barra lateral tipo Material Web */
-      #drawer {
-        background: var(--md-sys-color-surface-container-high);
-        /* box-shadow: 0 0 24px 0 rgba(0,0,0,0.13); */
-        box-shadow: none;
-        border-radius: 0 1.5em 1.5em 0;
-        overflow: hidden;
-        margin-top: 0;
-      }
-      #drawer.open {
-        transform: translateX(0%) !important;
-      }
-      @media (max-width: 700px) {
-        #drawer {
-          border-radius: 0 1.2em 1.2em 0;
-        }
-      }
-      /* Ajuste para que el backdrop no cubra la navbar */
-      #drawer-backdrop {
-        top: 56px !important;
-        height: calc(100vh - 56px) !important;
-      }
-      /* Navbar estilo Material Web */
-      #main-navbar {
-        /* box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04); */
-        background: var(--md-sys-color-surface-container-high);
-      }
-      @media (max-width: 700px) {
-        #main-navbar {
-          border-bottom-left-radius: 1.2em;
-          border-bottom-right-radius: 1.2em;
-        }
-      }
-
-      /* Drawer links estilo Material Web */
-      .drawer-link {
-        color: var(--md-sys-color-on-surface);
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 0.7em;
-        padding: 0.9em 1.5em;
-        font-size: 1.1em;
-        border-radius: 2em;
-        margin: 0.1em 0.5em;
-        transition: background 0.18s, color 0.18s;
-        position: relative;
-      }
-      .drawer-link .material-symbols-outlined {
-        font-size: 1.5em;
-      }
-      .drawer-link:hover, .drawer-link:focus {
-        background: var(--md-sys-color-surface-container-high);
-        color: var(--md-sys-color-on-surface);
-        outline: none;
-      }
-      .drawer-link:active::after {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 90%;
-        height: 90%;
-        background: rgba(60,60,60,0.07);
-        border-radius: 2em;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-      }
-    </style>
     <script>
     // --- THEME TOGGLE LOGIC ---
     const themeVars = {
@@ -489,22 +141,53 @@
     }
     window.addEventListener('DOMContentLoaded', initThemeToggle);
     </script>
-      <div id="drawer-backdrop" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;z-index:150;"></div>
+      <div id="drawer-backdrop" class="drawer-backdrop"></div>
     </header>
-    <style>
-      @media (min-width: 700px) {
-        .md-nav-label { display: inline !important; }
-      }
-      @media (max-width: 699px) {
-        .md-nav-label { display: none !important; }
-      }
-      @media (max-width: 699px) {
-        #navbar-title { font-size: 1.1em !important; }
-      }
-      #drawer-backdrop.open {
-        display: block !important;
-      }
-    </style>
+    <div class="pane content-pane">
+    <div class="container">
+        <div class="container header-container" >
+            <h1>Alimentador Automático</h1>
+            <div class="heading h2">
+                <h2 id="fecha-hora"></h2>
+            </div>
+
+        </div>
+
+      <form id="formAlimentador" autocomplete="off">
+        <div class="heading h2" style="text-align: justify;">
+            <h2>Días de la semana</h2>
+        </div>
+        <div class="dias">
+          <md-radio-group id="diasRadioGroup" name="dias" class="dias-radio-group">
+            <div class="dias-semana-col">
+              <div class="dia-radio-label"><md-radio id="monday" name="dias" value="L" label="Lunes"></md-radio><label for="monday">Lunes</label></div>
+              <div class="dia-radio-label"><md-radio id="tuesday" name="dias" value="M" label="Martes"></md-radio><label for="tuesday">Martes</label></div>
+              <div class="dia-radio-label"><md-radio id="wednesday" name="dias" value="X" label="Miércoles"></md-radio><label for="wednesday">Miércoles</label></div>
+              <div class="dia-radio-label"><md-radio id="thursday" name="dias" value="J" label="Jueves"></md-radio><label for="thursday">Jueves</label></div>
+              <div class="dia-radio-label"><md-radio id="friday" name="dias" value="V" label="Viernes"></md-radio><label for="friday">Viernes</label></div>
+              <div class="dia-radio-label"><md-radio id="saturday" name="dias" value="S" label="Sábado"></md-radio><label for="saturday">Sábado</label></div>
+              <div class="dia-radio-label"><md-radio id="sunday" name="dias" value="D" label="Domingo"></md-radio><label for="sunday">Domingo</label></div>
+            </div>
+          </md-radio-group>
+        </div>
+        <div class="heading h2" style="text-align: justify;">
+            <h2>Horarios de alimentación</h2>
+        </div>
+        <md-list class="horarios" id="horarios"></md-list>
+        <md-filled-button type="button" id="btnAgregarHorario" >Agregar horario</md-filled-button>
+        <md-filled-button type="submit" id="btnGuardarConfig" >Guardar configuración</md-filled-button>
+      </form>
+      <br>
+      <md-divider></md-divider>
+      <div id="mensaje" class="mensaje-toast"></div>
+      <div id="spinner" class="spinner-hidden"><md-circular-progress four-color indeterminate></md-circular-progress></div>
+      <br>
+      <md-filled-button id="btnAlimentarAhora">Alimentar ahora</md-filled-button>
+    </div>
+    </div>
+
+    </div>
+
     <script>
       // Drawer funcional tipo Material Web
       const drawer = document.getElementById('drawer');
@@ -532,41 +215,6 @@
         }
       });
     </script>
-    <div class="content-container">
-    <div class="container description">
-        <h1 >Alimentador Automático para Perros</h1>
-        <h2 id="fecha-hora"></div>
-    </div>
-    <div class="container">
-      <form id="formAlimentador" autocomplete="off">
-        <h2 style="margin-bottom:0.5em;">Días de la semana</h2>
-        <div class="dias">
-          <md-radio-group id="diasRadioGroup" name="dias" style="display:flex;flex-direction:column;gap:0.3em;align-items:center;">
-            <div class="dias-semana-col">
-              <div class="dia-radio-label"><md-radio id="monday" name="dias" value="L" label="Lunes"></md-radio><label for="monday">Lunes</label></div>
-              <div class="dia-radio-label"><md-radio id="tuesday" name="dias" value="M" label="Martes"></md-radio><label for="tuesday">Martes</label></div>
-              <div class="dia-radio-label"><md-radio id="wednesday" name="dias" value="X" label="Miércoles"></md-radio><label for="wednesday">Miércoles</label></div>
-              <div class="dia-radio-label"><md-radio id="thursday" name="dias" value="J" label="Jueves"></md-radio><label for="thursday">Jueves</label></div>
-              <div class="dia-radio-label"><md-radio id="friday" name="dias" value="V" label="Viernes"></md-radio><label for="friday">Viernes</label></div>
-              <div class="dia-radio-label"><md-radio id="saturday" name="dias" value="S" label="Sábado"></md-radio><label for="saturday">Sábado</label></div>
-              <div class="dia-radio-label"><md-radio id="sunday" name="dias" value="D" label="Domingo"></md-radio><label for="sunday">Domingo</label></div>
-            </div>
-          </md-radio-group>
-        </div>
-        <h2 style="margin-bottom:0.5em;">Horarios de alimentación</h2>
-        <md-list class="horarios" id="horarios"></md-list>
-        <md-filled-button type="button" id="btnAgregarHorario" >Agregar horario</md-filled-button>
-        <md-filled-button type="submit" id="btnGuardarConfig" >Guardar configuración</md-filled-button>
-      </form>
-      <br>
-      <md-divider></md-divider>
-      <div id="mensaje" style="position:fixed;top:1.5em;right:1.5em;z-index:1000;min-width:220px;max-width:90vw;display:none;"></div>
-      <div id="spinner" style="display:none;margin-top:1em;"><md-circular-progress four-color indeterminate></md-circular-progress></div>
-      <br>
-      <md-filled-button id="btnAlimentarAhora">Alimentar ahora</md-filled-button>
-    </div>
-    </div>
-
     <script>
     function mostrarSpinner(mostrar) {
       document.getElementById('spinner').style.display = mostrar ? '' : 'none';
@@ -607,6 +255,16 @@
 function agregarHorario(valor = '') {
   const horarios = document.getElementById('horarios');
   const item = document.createElement('md-list-item');
+  // Usar solo variables Material para contraste y consistencia
+  const fieldStyles = `
+    --md-outlined-field-label-text-color: var(--md-sys-color-on-surface-variant, #222);
+    --md-outlined-field-input-text-color: var(--md-sys-color-on-surface, #222);
+    --md-outlined-field-outline-color: var(--md-sys-color-outline, #b3b3c0);
+    --md-outlined-field-focus-outline-color: var(--md-sys-color-primary, #3a53e6);
+    --md-outlined-field-hover-outline-color: var(--md-sys-color-primary, #3a53e6);
+    background: var(--md-sys-color-surface-container-highest, #fff);
+    color: var(--md-sys-color-on-surface, #222);
+  `;
   item.innerHTML = `
     <div class="md-time-picker-mobile" style="display:none;align-items:center;gap:0.5em;width:100%;padding:5px 0;">
       <md-outlined-text-field
@@ -614,7 +272,7 @@ function agregarHorario(valor = '') {
         name="horario[]"
         required
         value="${valor}"
-        style="width:100%"
+        style="width:100%;${fieldStyles}"
       ></md-outlined-text-field>
       <md-icon-button type="button" onclick="eliminarHorario(this)" aria-label="Eliminar horario"><span class="material-symbols-outlined">close</span></md-icon-button>
     </div>
@@ -626,7 +284,7 @@ function agregarHorario(valor = '') {
         value="${valor}"
         label="Hora"
         class="md-time-picker-input"
-        style="flex:1 1 0%;width:100%;min-width:0;box-sizing:border-box;"
+        style="flex:1 1 0%;width:100%;min-width:0;box-sizing:border-box;${fieldStyles}"
         onclick="mostrarTimePicker(this)"
         tabindex="0"
       >
@@ -641,7 +299,7 @@ function agregarHorario(valor = '') {
 
 // Mostrar/ocultar el picker correcto según el tamaño de pantalla
 function ajustarPickerVisibilidad() {
-  const isMobile = window.matchMedia('(max-width: 700px)').matches;
+  const isMobile = window.matchMedia('(max-width: 717px)').matches;
   document.querySelectorAll('.md-time-picker-mobile').forEach(el => {
     el.style.display = isMobile ? 'flex' : 'none';
   });
