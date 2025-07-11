@@ -161,11 +161,11 @@ void cargarCredencialesWiFi() {
   data[i] = '\0';
   String str = String(data);
   int coma = str.indexOf(',');
-  // Si la EEPROM está vacía o solo contiene 0xFF, usar por defecto
+  // Si la EEPROM está vacía o solo contiene 0xFF, no establecer credenciales
   if (soloFF || coma <= 0 || coma >= (int)str.length() - 1) {
-    wifi_ssid = "IoT";
-    wifi_password = "24_RunJapan2024.1";
-    Serial.println("No hay credenciales WiFi guardadas, usando por defecto.");
+    wifi_ssid = "";
+    wifi_password = "";
+    Serial.println("No hay credenciales WiFi guardadas.");
     return;
   }
   String enc_ssid = str.substring(0, coma);
@@ -182,9 +182,9 @@ void cargarCredencialesWiFi() {
     if (wifi_password[j] < 32 || wifi_password[j] > 126) passValido = false;
   }
   if (!ssidValido || !passValido) {
-    wifi_ssid = "IoT";
-    wifi_password = "24_RunJapan2024.1";
-    Serial.println("Credenciales WiFi corruptas, usando por defecto.");
+    wifi_ssid = "";
+    wifi_password = "";
+    Serial.println("Credenciales WiFi corruptas, no se usarán credenciales.");
     return;
   }
   Serial.println("Credenciales WiFi desencriptadas:");
@@ -226,36 +226,7 @@ void sendHtml() {
 
 
 void setup(void) {
-
-  // Servir archivos CSS desde SPIFFS en ambas rutas: /archivo.css y /data/archivo.css
-  // server.serveStatic("/light.css", SPIFFS, "/light.css");
-  // server.serveStatic("/light-mc.css", SPIFFS, "/light-mc.css");
-  // server.serveStatic("/light-hc.css", SPIFFS, "/light-hc.css");
-  // server.serveStatic("/dark.css", SPIFFS, "/dark.css");
-  // server.serveStatic("/dark-mc.css", SPIFFS, "/dark-mc.css");
-  // server.serveStatic("/dark-hc.css", SPIFFS, "/dark-hc.css");
-  // También servir bajo /data/ para compatibilidad con las rutas del HTML
-  server.serveStatic("/data/light.css", SPIFFS, "/light.css");
-  server.serveStatic("/data/light-mc.css", SPIFFS, "/light-mc.css");
-  server.serveStatic("/data/light-hc.css", SPIFFS, "/light-hc.css");
-  server.serveStatic("/data/dark.css", SPIFFS, "/dark.css");
-  server.serveStatic("/data/dark-mc.css", SPIFFS, "/dark-mc.css");
-  server.serveStatic("/data/dark-hc.css", SPIFFS, "/dark-hc.css");
   server.serveStatic("/data/webpage-material.css", SPIFFS, "/webpage-material.css");
-  // // Route to load style.css file
-  // server.on("/style.css", HTTP_GET, [](){
-  //   server.send(200, "/style.css", "text/css");
-  // });
-  // server.on("/light,css", HTTP_GET, []() {
-  //   File f = SPIFFS.open("/light,css", "r");
-  //   if (!f) {
-  //     server.send(500, "text/css", "No se encontró wifimanager.html en SPIFFS");
-  //     return;
-  //   }
-  //   String css = f.readString();
-  //   f.close();
-  //   server.send(200, "/style.css", "text/css");
-  // });
 
   // Endpoint para mostrar el portal de configuración WiFi (sirve wifimanager.html)
   server.on("/setupwifi", HTTP_GET, []() {
@@ -449,6 +420,8 @@ void setup(void) {
     for (auto& c : configuraciones) Serial.printf("[%s,%s] ", c.dia.c_str(), c.horario.c_str());
     Serial.println();
     guardarConfiguracionEEPROM(configuraciones);
+    // Volver a cargar para reflejar los valores guardados en la respuesta
+    cargarConfiguracionEEPROM(configuraciones);
     server.send(200, "text/plain", "¡Configuración guardada en memoria!");
   });
 

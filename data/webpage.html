@@ -59,88 +59,8 @@
           <span>Configura tu WiFi</span>
         </a>
         <div class="drawer-flex-spacer"></div>
-        <!-- Theme toggle button group -->
-        <div id="theme-toggle-group">
-          <div id="theme-toggle">
-            <button id="theme-dark" aria-label="Oscuro"><span class="material-symbols-outlined">dark_mode</span></button>
-            <button id="theme-auto" aria-label="Auto"><span class="material-symbols-outlined">contrast</span></button>
-            <button id="theme-light" aria-label="Claro"><span class="material-symbols-outlined">light_mode</span></button>
-          </div>
-        </div>
       </aside>
-    <script>
-    // --- THEME TOGGLE LOGIC ---
-    const themeVars = {
-      light: {
-        '--color-primary': '#2456e6',
-        '--color-primary-dark': '#1a3fa0',
-        '--color-primary-light': '#eaf0fe',
-        '--color-accent': '#a259e6',
-        '--color-bg': '#f5f7fd',
-        '--color-surface': '#fafdff',
-        '--color-border': '#e0e6f7',
-        '--color-text': '#1a2340',
-        '--color-text-light': '#b3c0ff',
-        '--color-success': '#388e3c',
-        '--color-outline': '#2456e6',
-        '--color-shadow': '#2456e622',
-      },
-      dark: {
-        '--color-primary': '#3a53e6',
-        '--color-primary-dark': '#1a2340',
-        '--color-primary-light': '#23263a',
-        '--color-accent': '#a259e6',
-        '--color-bg': '#181a23',
-        '--color-surface': '#23263a',
-        '--color-border': '#35395a',
-        '--color-text': '#eaf0fe',
-        '--color-text-light': '#b3c0ff',
-        '--color-success': '#7be67b',
-        '--color-outline': '#a259e6',
-        '--color-shadow': '#000a',
-      }
-    };
-    function setTheme(mode) {
-      let vars = themeVars.light;
-      if (mode === 'dark') vars = themeVars.dark;
-      else if (mode === 'auto') vars = window.matchMedia('(prefers-color-scheme: dark)').matches ? themeVars.dark : themeVars.light;
-      for (const k in vars) document.documentElement.style.setProperty(k, vars[k]);
-      // Botón seleccionado
-      document.querySelectorAll('#theme-toggle button').forEach(btn => btn.classList.remove('selected'));
-      document.getElementById('theme-' + mode).classList.add('selected');
-
-      // Cambiar clase .light/.dark en elementos relevantes
-      const themedElements = document.querySelectorAll('.light, .dark');
-      themedElements.forEach(el => {
-        el.classList.remove('light', 'dark');
-        if (mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          el.classList.add('dark');
-        } else {
-          el.classList.add('light');
-        }
-      });
-    }
-    // Guardar preferencia en localStorage
-    function saveThemePref(mode) {
-      localStorage.setItem('theme-mode', mode);
-    }
-    function loadThemePref() {
-      return localStorage.getItem('theme-mode') || 'auto';
-    }
-    // Inicializar
-    function initThemeToggle() {
-      const mode = loadThemePref();
-      setTheme(mode);
-      document.getElementById('theme-dark').onclick = () => { setTheme('dark'); saveThemePref('dark'); };
-      document.getElementById('theme-light').onclick = () => { setTheme('light'); saveThemePref('light'); };
-      document.getElementById('theme-auto').onclick = () => { setTheme('auto'); saveThemePref('auto'); };
-      // Cambia automáticamente si el usuario cambia el sistema
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        if (loadThemePref() === 'auto') setTheme('auto');
-      });
-    }
-    window.addEventListener('DOMContentLoaded', initThemeToggle);
-    </script>
+    <!-- Lógica de cambio de tema eliminada: solo modo claro -->
       <div id="drawer-backdrop" class="drawer-backdrop"></div>
     </header>
     <div class="pane content-pane">
@@ -299,7 +219,7 @@ function agregarHorario(valor = '') {
 
 // Mostrar/ocultar el picker correcto según el tamaño de pantalla
 function ajustarPickerVisibilidad() {
-  const isMobile = window.matchMedia('(max-width: 717px)').matches;
+  const isMobile = window.matchMedia('(max-width: 700px)').matches;
   document.querySelectorAll('.md-time-picker-mobile').forEach(el => {
     el.style.display = isMobile ? 'flex' : 'none';
   });
