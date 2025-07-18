@@ -3,16 +3,12 @@
   <head>
     <meta charset="UTF-8">
     <title>Alimentador Automático para Perros</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- content="initial-scale=1, maximum-scale=1" -->
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
     <link href="https://fonts.cdnfonts.com/css/google-sans" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-    <link rel="stylesheet" href="/data/light.css">
-    <link rel="stylesheet" href="/data/light-mc.css">
-    <link rel="stylesheet" href="/data/light-hc.css">
-    <link rel="stylesheet" href="/data/dark.css">
-    <link rel="stylesheet" href="/data/dark-mc.css">
-    <link rel="stylesheet" href="/data/dark-hc.css">
+    <link rel="icon" type="image/png" sizes="16x16" href="/data/favicon.ico">
     <script type="importmap">
       {
         "imports": {
@@ -38,7 +34,7 @@
           </button>
           <span id="navbar-title" class="navbar-title">DogFeeder</span>
         </div>
-        <div id="navbar-actions" class="navbar-actions">
+        <!-- <div id="navbar-actions" class="navbar-actions">
           <a href="/" title="Inicio" class="navbar-link">
             <span class="material-symbols-outlined navbar-link-icon">home</span>
             <span class="md-nav-label">Inicio</span>
@@ -47,7 +43,7 @@
             <span class="material-symbols-outlined navbar-link-icon">wifi</span>
             <span class="md-nav-label">Configura tu WiFi</span>
           </a>
-        </div>
+        </div> -->
       </nav>
       <aside id="drawer" class="light drawer-fixed">
         <a href="/" class="drawer-link">
@@ -64,7 +60,7 @@
       <div id="drawer-backdrop" class="drawer-backdrop"></div>
     </header>
     <div class="pane content-pane">
-    <div class="container">
+    <div class="container" id="main-container" style="height: 100dvh;" >
         <div class="container header-container" >
             <h1>Alimentador Automático</h1>
             <div class="heading h2">
@@ -186,7 +182,7 @@ function agregarHorario(valor = '') {
     color: var(--md-sys-color-on-surface, #222);
   `;
   item.innerHTML = `
-    <div class="md-time-picker-mobile" style="display:none;align-items:center;gap:0.5em;width:100%;padding:5px 0;">
+    <div class="md-time-picker-mobile" style="display:flex;align-items:center;gap:0.5em;width:100%;padding:5px 0;">
       <md-outlined-text-field
         type="time"
         name="horario[]"
@@ -196,40 +192,10 @@ function agregarHorario(valor = '') {
       ></md-outlined-text-field>
       <md-icon-button type="button" onclick="eliminarHorario(this)" aria-label="Eliminar horario"><span class="material-symbols-outlined">close</span></md-icon-button>
     </div>
-    <div class="md-time-picker-container" style="display:flex;align-items:center;gap:0.5em;width:100%;padding:5px 0;">
-      <md-outlined-text-field
-        name="horario[]"
-        required
-        readonly
-        value="${valor}"
-        label="Hora"
-        class="md-time-picker-input"
-        style="flex:1 1 0%;width:100%;min-width:0;box-sizing:border-box;${fieldStyles}"
-        onclick="mostrarTimePicker(this)"
-        tabindex="0"
-      >
-        <md-icon slot="trailing-icon">schedule</md-icon>
-      </md-outlined-text-field>
-      <md-icon-button type="button" onclick="eliminarHorario(this)" aria-label="Eliminar horario"><span class="material-symbols-outlined">close</span></md-icon-button>
-    </div>
   `;
   horarios.appendChild(item);
-  ajustarPickerVisibilidad();
 }
 
-// Mostrar/ocultar el picker correcto según el tamaño de pantalla
-function ajustarPickerVisibilidad() {
-  const isMobile = window.matchMedia('(max-width: 700px)').matches;
-  document.querySelectorAll('.md-time-picker-mobile').forEach(el => {
-    el.style.display = isMobile ? 'flex' : 'none';
-  });
-  document.querySelectorAll('.md-time-picker-container').forEach(el => {
-    el.style.display = isMobile ? 'none' : 'flex';
-  });
-}
-
-window.addEventListener('resize', ajustarPickerVisibilidad);
-window.addEventListener('DOMContentLoaded', ajustarPickerVisibilidad);
 // --- Custom Material Time Picker ---
 let timePickerDialog = null;
 function mostrarTimePicker(input) {
@@ -367,6 +333,10 @@ function cerrarTimePicker() {
 function eliminarHorario(btn) {
   const item = btn.closest('md-list-item');
   if (item) item.remove();
+  const horariosDiv = document.getElementById('horarios');
+  if (horariosDiv && horariosDiv.children.length === 0) {
+    agregarHorario(); // Asegurar al menos un horario
+  }
 }
 
     let configuracionesGuardadas = [];
@@ -452,10 +422,6 @@ document.getElementById('formAlimentador').onsubmit = function(e) {
   }).filter(v => v);
   if (!dia) {
     mostrarMensaje('Selecciona un día.', 'error');
-    return;
-  }
-  if (!horarios.length) {
-    mostrarMensaje('Agrega al menos un horario.', 'error');
     return;
   }
   const btnGuardar = document.getElementById('btnGuardarConfig');

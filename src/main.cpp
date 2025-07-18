@@ -11,6 +11,7 @@
 #include <NTPClient.h>
 #include <AESLib.h>
 #include <Stepper.h>
+#include <ESPmDNS.h>
 #include "webpage.h"
 #include "config.h"
 // Estructura para almacenar hasta 3 horarios por día
@@ -313,6 +314,16 @@ void setup(void) {
     }
   }
 
+  // Inicializar mDNS después de establecer conexión WiFi
+  if (WiFi.status() == WL_CONNECTED) {
+    if (!MDNS.begin("dogfeeder")) {
+      Serial.println("Error al inicializar mDNS");
+    } else {
+      Serial.println("mDNS iniciado. Accede via: http://dogfeeder.local");
+      MDNS.addService("http", "tcp", 80);
+    }
+  }
+
   // Inicializar NTP solo si hay WiFi
   if (WiFi.status() == WL_CONNECTED) {
     timeClient.begin();
@@ -381,12 +392,24 @@ void setup(void) {
             horarios.push_back(horariosStr.substring(idx+1, end));
             last = end+1;
           }
+          // Eliminar solo los horarios del día que NO estén en la nueva lista
           for (auto it = configuraciones.begin(); it != configuraciones.end(); ) {
-            if (it->dia == dia) it = configuraciones.erase(it);
-            else ++it;
+            if (it->dia == dia && std::find(horarios.begin(), horarios.end(), it->horario) == horarios.end()) {
+              it = configuraciones.erase(it);
+            } else {
+              ++it;
+            }
           }
+          // Agregar los nuevos horarios que no existan aún
           for (size_t j = 0; j < horarios.size(); ++j) {
-            if (configuraciones.size() < 21)
+            bool existe = false;
+            for (auto& c : configuraciones) {
+              if (c.dia == dia && c.horario == horarios[j]) {
+                existe = true;
+                break;
+              }
+            }
+            if (!existe && configuraciones.size() < 21)
               configuraciones.push_back({dia, horarios[j]});
           }
         }
@@ -420,9 +443,15 @@ void setup(void) {
     for (auto& c : configuraciones) Serial.printf("[%s,%s] ", c.dia.c_str(), c.horario.c_str());
     Serial.println();
     guardarConfiguracionEEPROM(configuraciones);
-    // Volver a cargar para reflejar los valores guardados en la respuesta
     cargarConfiguracionEEPROM(configuraciones);
-    server.send(200, "text/plain", "¡Configuración guardada en memoria!");
+    // Devolver la configuración actualizada como JSON
+    String json = "[";
+    for (size_t i = 0; i < configuraciones.size(); ++i) {
+      json += "{\"dia\":\"" + configuraciones[i].dia + "\",\"horario\":\"" + configuraciones[i].horario + "\"}";
+      if (i < configuraciones.size() - 1) json += ",";
+    }
+    json += "]";
+    server.send(200, "application/json", json);
   });
 
   // --- Endpoint para establecer credenciales WiFi (útil si quieres cambiar la red desde la web) ---
